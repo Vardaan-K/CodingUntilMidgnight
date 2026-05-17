@@ -27,6 +27,15 @@ export const db = {
   },
   clearCache(key) {
     database.run("DELETE FROM cache WHERE place_id = ?", [key]);
+    database.run("DELETE FROM classified_cache WHERE query = ?", [key]);
+    save();
+  },
+  getClassified(key) {
+    const res = database.exec("SELECT data FROM classified_cache WHERE query = ?", [key]);
+    return res.length ? JSON.parse(res[0].values[0][0]) : null;
+  },
+  setClassified(key, data) {
+    database.run("INSERT OR REPLACE INTO classified_cache (query, data) VALUES (?, ?)", [key, JSON.stringify(data)]);
     save();
   },
   addReport(placeId, type, comment) {
