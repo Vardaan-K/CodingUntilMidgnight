@@ -3,6 +3,7 @@ import express from "express";
 import cors from "cors";
 import { initDb, db } from "./src/db.js";
 import { gather } from "./src/gather.js";
+import { classify } from "./src/classify.js";
 import { analyze } from "./src/analyze.js";
 
 const app = express();
@@ -19,19 +20,30 @@ app.get("/search", async (req, res) => {
     const cached = db.getCache(query);
     if (cached) return res.json(cached);
 
-    // Step 1: Gather sources (web search, future: deterministic scraping)
-    const sources = await gather(query);
+    // Step 1 & 2: Check classified cache or gather + classify
+    let classified = db.getClassified(query);
+    if (!classified) {
+      const gathered = await gather(query);
+      classified = await classify(gathered);
+      db.setClassified(query, classified);
+    }
 
-    // Step 2: Analyze gathered data with LLM
-    const ai = await analyze(query, sources);
+    // Step 3: Analyze classified data with LLM
+    const ai = await analyze(query, classified);
 
-    // Blend with user reports
-    const { pos, neg } = db.getReportCounts(query);
-    const reportScore = pos + neg > 0 ? (pos / (pos + neg)) * 100 : ai.score;
-    const score = Math.round(ai.score * 0.6 + reportScore * 0.4);
-    const badge = score >= 80 ? "safe" : score >= 50 ? "caution" : "danger";
+    const result = {
+      id: query,
+      name: ai.name,
+      address: ai.address,
+      scores: {
+        identity: ai.identity,
+        operations: ai.operations,
+        safety: ai.safety,
+      },
+      final: ai.final,
+      sources: ai.sources,
+    };
 
-    const result = { id: query, name: ai.name || query, address: ai.address || "", score, badge, summary: ai.summary, signals: ai.signals, sources: ai.sources || sources.sources };
     db.setCache(query, result);
     res.json(result);
   } catch (err) {

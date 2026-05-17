@@ -11,12 +11,17 @@ mkdirSync(new URL("../logs", import.meta.url), { recursive: true });
 
 const GATHER_PROMPT = readFileSync(new URL("./prompts/gather.txt", import.meta.url), "utf-8");
 
+// Searches organized by category — deterministic scrapers will plug in here
 const SEARCHES = [
-  q => `${q} reviews Yelp Google`,
-  q => `${q} Reddit community discussion`,
-  q => `${q} employees Glassdoor Indeed workplace`,
-  q => `${q} news controversy inclusive`,
-  q => `${q} LGBTQ inclusive`,
+  // Discrimination
+  q => `${q} employee reviews diversity inclusion`,
+  q => `${q} Reddit community experience`,
+  // Operations
+  q => `${q} employee reviews Glassdoor Indeed`,
+  q => `${q} working conditions management culture`,
+  // Safety
+  q => `${q} health inspection reviews`,
+  q => `${q} customer experience incidents news`,
 ];
 
 async function webSearch(searchQuery) {
@@ -36,7 +41,7 @@ async function webSearch(searchQuery) {
       for (const block of output.content || []) {
         if (block.type === "output_text") text += block.text;
         for (const ann of block.annotations || []) {
-          if (ann.type === "url_citation") sources.push({ url: ann.url, title: ann.title || "" });
+          if (ann.type === "url_citation") sources.push({ url: ann.url.replace(/[?&]utm_source=openai$/, ""), title: ann.title || "" });
         }
       }
     }
@@ -44,19 +49,38 @@ async function webSearch(searchQuery) {
   return { text, sources };
 }
 
+const MAX_CONCURRENT = 3;
+
+async function runWithConcurrency(tasks, limit) {
+  const results = [];
+  const executing = new Set();
+  for (const task of tasks) {
+    const p = task().then(r => { executing.delete(p); return r; });
+    executing.add(p);
+    results.push(p);
+    if (executing.size >= limit) await Promise.race(executing);
+  }
+  return Promise.all(results);
+}
+
 export async function gather(query) {
-  const results = await Promise.all(
-    SEARCHES.map(fn => webSearch(fn(query)))
+  const results = await runWithConcurrency(
+    SEARCHES.map(fn => () => webSearch(fn(query))),
+    MAX_CONCURRENT
   );
+
+  // TODO: Add deterministic scraper results here
+  // e.g. const yelpData = await scrapeYelp(query);
+  //      const redditData = await scrapeReddit(query);
+  //      results.push(yelpData, redditData);
 
   const allText = results.map((r, i) => `--- Search ${i + 1} ---\n${r.text}`).join("\n\n");
   const allSources = results.flatMap(r => r.sources);
 
-  // Deduplicate
   const seen = new Set();
   const sources = allSources.filter(s => { if (seen.has(s.url)) return false; seen.add(s.url); return true; });
 
-  // Log gathered data
+  // Log
   const slug = query.replace(/[^a-zA-Z0-9]+/g, "-").toLowerCase().slice(0, 50);
   const logFile = new URL(`../logs/${slug}_${Date.now()}.txt`, import.meta.url);
   let log = `Query: "${query}"\nTimestamp: ${new Date().toISOString()}\nSearches: ${SEARCHES.length}\nSources found: ${sources.length}\n${"=".repeat(60)}\n\n`;
