@@ -25,6 +25,10 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime
 from typing import Dict
 
+from dotenv import load_dotenv
+
+load_dotenv()
+
 from tripadvisor_scraper import get_tripadvisor_data
 from google_news_scraper import search_google_news
 from google_reviews_scraper import get_google_reviews_data
