@@ -38,6 +38,27 @@ export const db = {
     database.run("INSERT OR REPLACE INTO classified_cache (query, data) VALUES (?, ?)", [key, JSON.stringify(data)]);
     save();
   },
+  /**
+   * Resolution cache lookup.
+   * Returns:
+   *   undefined → never tried
+   *   ""        → tried, no match (don't re-call Places)
+   *   "<id>"    → resolved place_id
+   */
+  getResolution(queryNorm, locationNorm) {
+    const res = database.exec(
+      "SELECT place_id FROM resolution_cache WHERE query_norm = ? AND location_norm = ?",
+      [queryNorm, locationNorm]
+    );
+    return res.length ? res[0].values[0][0] : undefined;
+  },
+  setResolution(queryNorm, locationNorm, placeId) {
+    database.run(
+      "INSERT OR REPLACE INTO resolution_cache (query_norm, location_norm, place_id) VALUES (?, ?, ?)",
+      [queryNorm, locationNorm, placeId || ""]
+    );
+    save();
+  },
   addReport(placeId, type, comment) {
     database.run("INSERT INTO reports (place_id, type, comment) VALUES (?, ?, ?)", [placeId, type, comment]);
     save();
