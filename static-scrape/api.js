@@ -1,6 +1,7 @@
 import "dotenv/config";
 
 const BASE_URL = "https://serpapi.com/search.json";
+const LOCATIONS_URL = "https://serpapi.com/locations.json";
 
 export async function _fetch(engine, params) {
   const apiKey = process.env.SERPAPI_KEY;
@@ -14,10 +15,24 @@ export async function _fetch(engine, params) {
   }
 
   const res = await fetch(url.toString());
-  if (!res.ok) throw new Error(`SerpAPI error: ${res.status} ${res.statusText}`);
+  if (!res.ok) {
+    const body = await res.text();
+    throw new Error(`SerpAPI error: ${res.status} ${res.statusText} — ${body}`);
+  }
 
   const data = await res.json();
   if (data.error) throw new Error(`SerpAPI: ${data.error}`);
 
   return data;
+}
+
+export async function _fetchLocations(query, limit = 5) {
+  const url = new URL(LOCATIONS_URL);
+  url.searchParams.set("q", query);
+  url.searchParams.set("limit", limit);
+
+  const res = await fetch(url.toString());
+  if (!res.ok) throw new Error(`SerpAPI locations error: ${res.status} ${res.statusText}`);
+
+  return res.json();
 }

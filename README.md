@@ -1,6 +1,6 @@
 # SerpAPI Client
 
-A lightweight JavaScript client for searching businesses and fetching their reviews via SerpAPI.
+A JavaScript client for searching businesses and fetching a balanced mix of reviews from Google, Yelp, and TripAdvisor via SerpAPI.
 
 ---
 
@@ -10,41 +10,74 @@ Add your SerpAPI key to `.env`:
 ```
 SERPAPI_KEY=your_key_here
 ```
+
+---
+
+## Files
+
+```
+staticScraperMain.js  — three exported functions (see below)
+api.js                — low-level fetch helper, handles API key + errors
+parsers.js            — shapes raw SerpAPI responses into clean objects
+test.js               — test file, edit values at the top to try different businesses
+```
+
 ---
 
 ## Functions
 
+### `searchLocations(query)`
+
+Searches for locations by name. Returns a list for a location dropdown.
+The chosen result gets passed into `searchBusiness()`.
+
+```js
+const locations = await searchLocations("San Luis Obispo");
+// returns: [{ canonical_name, name, type, gps: { lat, lng } }, ...]
+```
+
+---
+
 ### `searchBusiness(name, location)`
 
-Searches for businesses by name and location. Intended to power a search dropdown — returns just enough info to display a list of results and let the user pick the right one.
+Searches for businesses by name near a location.
+Returns a list for a business search dropdown.
+Pass the chosen result into `getReviews()`.
 
-**Parameters**
-- `name` — Business name (e.g. `"Starbucks"`)
-- `location` — City, state, or zip (e.g. `"San Luis Obispo, CA"`)
-
-**Example**
 ```js
-import { searchBusiness } from "./staticScraperMain.js";
-
-const results = await searchBusiness("Starbucks", "San Luis Obispo, CA");
+const businesses = await searchBusiness("Starbucks", locations[0]);
+// returns: [{ place_id, name, address, type, gps }, ...]
 ```
 
-**Example Output**
-```json
-[
-  {
-    "place_id": "0x80ed40e5b3e1d4cb:0x4f3e1d4cb3e1d4cb",
-    "name": "Starbucks",
-    "address": "999 Monterey St, San Luis Obispo, CA 93401",
-    "type": "Coffee shop"
+---
+
+### `getReviews(business)`
+
+Fetches a balanced mix of reviews from Google, Yelp, and TripAdvisor.
+Makes **11 API calls** in two parallel waves — 2 to find Yelp/TripAdvisor IDs, then 9 review calls all at once.
+
+```js
+const reviews = await getReviews(businesses[0]);
+```
+
+**Return shape:**
+```js
+{
+  google_reviews: {
+    newest:   [...],  // 8 reviews
+    positive: [...],  // 8 reviews, highest rated
+    critical: [...],  // 8 reviews, lowest rated
   },
-  {
-    "place_id": "0x80ed40e5b3e1d4cb:0x9a2f3e1d4cb3e1d4",
-    "name": "Starbucks",
-    "address": "131 Suburban Rd, San Luis Obispo, CA 93401",
-    "type": "Coffee shop"
-  }
-]
+  yelp_reviews: {
+    newest:   [...],  // 49 reviews
+    positive: [...],  // 49 reviews, highest rated
+    critical: [...],  // 49 reviews, lowest rated
+  },
+  tripadvisor_reviews: {
+    newest:   [...],  // 16 reviews
+    positive: [...],  // 16 reviews, rating 4-5
+    critical: [...],  // 16 reviews, rating 1-2
+  },
+  llm_format: "..."   // all reviews combined as plain text, ready to send to an LLM
+}
 ```
-
-The `place_id` is used internally to fetch reviews once the user selects a business.
