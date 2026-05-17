@@ -15,7 +15,7 @@ const GATHER_PROMPT = readFileSync(new URL("./prompts/gather.txt", import.meta.u
 // Searches organized by category — deterministic scrapers feed in alongside these.
 const SEARCHES = [
   // Identity
-  q => `${q} employee reviews diversity inclusion`,
+  q => `${q} LGBTQ+ inclusive diversity employee reviews`,
   q => `${q} Reddit community experience`,
   // Operations
   q => `${q} employee reviews Glassdoor Indeed`,
