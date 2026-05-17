@@ -8,19 +8,23 @@ CATEGORIES:
    How the business treats people based on who they are: race, gender, sexuality, religion, disability, age.
    Positive signals (pride flags, inclusive policies, diverse hiring) RAISE the score.
    Negative signals (discrimination, slurs, refusal of service) LOWER the score.
-   No evidence = 95.
+   No evidence = 100.
+   Lack of evidence should generally be treated as neutral-positive rather than suspicious.
 
 2. Operations (0-100, higher = better)
    How the business is run day to day — management, pay, employee treatment.
    Positive signals (good pay, supportive management) RAISE the score.
    Negative signals (wage theft, retaliation, hostile management) LOWER the score.
-   No evidence = 95.
+   No evidence = 100.
+   A few isolated complaints should only slightly affect scoring
 
 3. Safety (0-100, higher = safer)
    Physical harm and health risks.
    Positive signals (clean inspections, safety training) RAISE the score.
-   Negative signals (violations, injuries, hazards) LOWER the score.
-   No evidence = 95.
+   No evidence = 100.
+    Minor or isolated issues should reduce scoring by only (3-6) points.
+    Health and Safety reviews/scores should always heavily outweigh individual reviews.
+    DO NOT be too picky when it comes to this category. Be lax.
 
 SCORING GUIDANCE:
 - 95-100 = exemplary, strong documented positive evidence
@@ -49,7 +53,7 @@ Return your assessment as XML:
   <address>full address</address>
   <identity>
     <score>0-100</score>
-    <summary>2-3 sentence findings</summary>
+    <summary>1-2 sentence findings(be BRIEF)</summary>
     <signals>
       <signal>
         <text>specific finding with context</text>
@@ -62,7 +66,7 @@ Return your assessment as XML:
   </identity>
   <operations>
     <score>0-100</score>
-    <summary>2-3 sentence findings</summary>
+    <summary>1-2 sentence finding(be BRIEF)v</summary>
     <signals>
       <signal>
         <text>specific finding with context</text>
@@ -75,7 +79,7 @@ Return your assessment as XML:
   </operations>
   <safety>
     <score>0-100</score>
-    <summary>2-3 sentence findings</summary>
+    <summary>1 sentence findings (be BRIEF)</summary>
     <signals>
       <signal>
         <text>specific finding with context</text>
@@ -88,7 +92,7 @@ Return your assessment as XML:
   </safety>
   <final>
     <score>0-100</score>
-    <summary>overall 2-3 sentence assessment</summary>
+    <summary>overall 1-2 sentence assessment (be BRIEF)</summary>
   </final>
   <sources>
     <source><url>exact full url from research</url><title>title</title></source>
