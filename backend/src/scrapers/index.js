@@ -6,6 +6,7 @@
 import { searchGoogleNews } from "./googleNews.js";
 import { getGoogleReviewsData } from "./googleReviews.js";
 import { getTripadvisorData } from "./tripadvisor.js";
+import { getSerpApiReviewsData } from "./serpapi.js";
 
 /**
  * Run all scrapers concurrently for a business.
@@ -14,7 +15,8 @@ import { getTripadvisorData } from "./tripadvisor.js";
  * @param {string} businessName
  * @param {string} [location]
  * @returns {Promise<{business_name:string, location:string, timestamp:string,
- *                    google_news:object, google_reviews:object, tripadvisor:object}>}
+ *                    google_news:object, google_reviews:object, tripadvisor:object,
+ *                    serpapi:object}>}
  */
 export async function aggregateBusinessData(businessName, location = "") {
   const tasks = {
@@ -32,6 +34,13 @@ export async function aggregateBusinessData(businessName, location = "") {
       source: "tripadvisor",
       error: e.message,
       reviews: [],
+    })),
+    serpapi: getSerpApiReviewsData(businessName, location).catch((e) => ({
+      source: "serpapi",
+      error: e.message,
+      google_reviews: { newest: [], positive: [], critical: [] },
+      yelp_reviews: { newest: [], positive: [], critical: [] },
+      tripadvisor_reviews: { newest: [], positive: [], critical: [] },
     })),
   };
 
@@ -149,5 +158,25 @@ export function aggregateToBlocks(aggregate) {
   tryAdd("Google News", googleNewsToBlock, aggregate.google_news);
   tryAdd("Google Reviews", googleReviewsToBlock, aggregate.google_reviews);
   tryAdd("TripAdvisor", tripadvisorToBlock, aggregate.tripadvisor);
+  tryAdd("SerpAPI Reviews", serpapiToBlock, aggregate.serpapi);
   return blocks;
+}
+
+function serpapiToBlock(data) {
+  if (!data || data.error || !data.llm_format) return null;
+  const header = [
+    `SerpAPI multi-source reviews for "${data.business_name}":`,
+    data.address ? `Address: ${data.address}` : null,
+    data.place_id ? `Google place_id: ${data.place_id}` : null,
+  ].filter(Boolean);
+
+  const sources = [];
+  if (data.place_id) {
+    sources.push({
+      url: `https://www.google.com/maps/place/?q=place_id:${data.place_id}`,
+      title: `${data.business_name} on Google Maps`,
+    });
+  }
+
+  return { text: [...header, "", data.llm_format].join("\n"), sources };
 }
