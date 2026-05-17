@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Whistleblower — Admin</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<header class="border-b border-line">
+  <div class="max-w-[1100px] mx-auto px-10 py-5 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <a href="search" class="flex items-center gap-3" style="text-decoration:none;color:inherit">
+        <div class="w-6 h-6 bg-[var(--ink)] flex items-center justify-center">
+          <div class="w-1.5 h-1.5 bg-[var(--paper)]"></div>
+        </div>
+        <span class="serif text-xl">Whistleblower</span>
+      </a>
+      <span class="mono text-xs px-2 py-0.5 rounded" style="background:var(--amber-paper);color:var(--amber)">ADMIN</span>
+    </div>
+    <a href="search" class="mono text-xs ink-3 hover:text-[var(--ink)] underline">← Back to search</a>
+  </div>
+</header>
+
+<main class="max-w-[1100px] mx-auto px-10 py-10">
+
+  <div class="flex items-baseline justify-between mb-8">
+    <div>
+      <h1 class="serif text-4xl mb-1">Cache</h1>
+      <p class="text-sm ink-3">Scored businesses stored in the local SQLite database.</p>
+    </div>
+    <div class="flex items-center gap-3">
+      <span class="mono text-xs ink-4" id="count-label">Loading…</span>
+      <button id="clear-all-btn" class="mono text-xs px-3 py-2 rounded border border-soft hover:border-[var(--red)] hover:text-[var(--red)] hover:bg-[var(--red-paper)] transition-colors" style="color:var(--ink-3)">
+        Clear all
+      </button>
+      <button id="refresh-btn" class="mono text-xs px-3 py-2 rounded border border-soft hover:border-[var(--ink)] transition-colors" style="color:var(--ink-3)">
+        Refresh
+      </button>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div id="table-wrap">
+    <div class="mono text-xs ink-4 py-10 text-center">Loading…</div>
+  </div>
+
+</main>
+
+<script>
+  const BASE = 'http://localhost:3001';
+
+  function scoreColor(s) {
+    if (s === null || s === undefined) return 'var(--ink-4)';
+    if (s >= 80) return 'var(--green)';
+    if (s >= 60) return 'var(--amber)';
+    return 'var(--red)';
+  }
+
+  function grade(s) {
+    if (s === null || s === undefined) return '—';
+    if (s >= 90) return 'A';
+    if (s >= 80) return 'B';
+    if (s >= 70) return 'C';
+    if (s >= 60) return 'D';
+    return 'F';
+  }
+
+  async function load() {
+    document.getElementById('table-wrap').innerHTML =
+      '<div class="mono text-xs ink-4 py-10 text-center">Loading…</div>';
+
+    const rows = await fetch(`${BASE}/admin/cache`).then(r => r.json());
+    document.getElementById('count-label').textContent =
+      rows.length === 1 ? '1 entry' : `${rows.length} entries`;
+
+    if (!rows.length) {
+      document.getElementById('table-wrap').innerHTML =
+        '<div class="mono text-xs ink-4 py-10 text-center border border-faint rounded">No cached businesses yet.</div>';
+      return;
+    }
+
+    const html = `
+      <table class="w-full text-sm border-collapse">
+        <thead>
+          <tr class="border-b border-line">
+            <th class="tag text-left py-2 pr-6">Business</th>
+            <th class="tag text-left py-2 pr-6">Address</th>
+            <th class="tag text-left py-2 pr-6">Query</th>
+            <th class="tag text-center py-2 pr-6">Score</th>
+            <th class="tag text-left py-2 pr-6">Cache key</th>
+            <th class="tag py-2"></th>
+          </tr>
+        </thead>
+        <tbody>
+          ${rows.map(r => `
+            <tr class="border-b border-faint hover:bg-[var(--line-faint)] group" data-key="${encodeURIComponent(r.key)}">
+              <td class="py-3 pr-6 font-medium" style="font-family:'Instrument Serif',serif;font-size:17px;letter-spacing:-0.01em">${r.name}</td>
+              <td class="py-3 pr-6 ink-3 text-xs mono">${r.address || '—'}</td>
+              <td class="py-3 pr-6 ink-3 text-xs mono">${r.query || '—'}${r.location ? ' · ' + r.location.split(',')[0] : ''}</td>
+              <td class="py-3 pr-6 text-center">
+                <span class="num-display text-2xl" style="color:${scoreColor(r.score)}">${r.score ?? '—'}</span>
+                <span class="mono text-xs ink-4 ml-1">${grade(r.score)}</span>
+              </td>
+              <td class="py-3 pr-6 mono text-xs ink-4 max-w-[180px] truncate" title="${r.key}">${r.key}</td>
+              <td class="py-3 text-right">
+                <div class="flex items-center justify-end gap-2">
+                  <a href="business?query=${encodeURIComponent(r.query || r.name)}&location=${encodeURIComponent(r.location || '')}"
+                     class="mono text-xs ink-4 hover:text-[var(--ink)] underline opacity-0 group-hover:opacity-100 transition-opacity">
+                    view
+                  </a>
+                  <button class="delete-btn mono text-xs px-2 py-1 rounded hover:bg-[var(--red-paper)] hover:text-[var(--red)] transition-colors opacity-0 group-hover:opacity-100" style="color:var(--ink-4)">
+                    delete
+                  </button>
+                </div>
+              </td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>`;
+
+    document.getElementById('table-wrap').innerHTML = html;
+
+    // Delete row handlers
+    document.querySelectorAll('.delete-btn').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const row = btn.closest('tr');
+        const key = decodeURIComponent(row.dataset.key);
+        btn.textContent = '…';
+        btn.disabled = true;
+        await fetch(`${BASE}/admin/cache/${encodeURIComponent(key)}`, { method: 'DELETE' });
+        row.style.opacity = '0.3';
+        row.style.transition = 'opacity 0.2s';
+        setTimeout(() => { row.remove(); updateCount(); }, 200);
+      });
+    });
+  }
+
+  function updateCount() {
+    const n = document.querySelectorAll('tbody tr').length;
+    document.getElementById('count-label').textContent = n === 1 ? '1 entry' : `${n} entries`;
+    if (n === 0) load(); // show empty state
+  }
+
+  document.getElementById('refresh-btn').addEventListener('click', load);
+
+  document.getElementById('clear-all-btn').addEventListener('click', async () => {
+    if (!confirm(`Delete all cached entries? This cannot be undone.`)) return;
+    await fetch(`${BASE}/admin/cache`, { method: 'DELETE' });
+    load();
+  });
+
+  load();
+</script>
+
+</body>
+</html>

@@ -132,6 +132,24 @@ app.get("/scrape", async (req, res) => {
   }
 });
 
+// ── Admin endpoints ───────────────────────────────────────────────────────────
+
+app.get("/admin/cache", (_req, res) => {
+  res.json(db.listCache());
+});
+
+app.delete("/admin/cache/:key", (req, res) => {
+  db.clearCache(decodeURIComponent(req.params.key));
+  res.json({ success: true });
+});
+
+app.delete("/admin/cache", (_req, res) => {
+  db.clearAllCache();
+  res.json({ success: true });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+
 app.post("/report", (req, res) => {
   const { placeId, type, comment } = req.body;
   if (!placeId || !["positive", "negative"].includes(type)) {
