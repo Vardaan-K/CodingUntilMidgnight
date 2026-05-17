@@ -12,11 +12,11 @@
  * Google Places `findplacefromtext` request (~$0.017); every subsequent
  * call is a sub-millisecond SQLite hit.
  *
- * If Places returns no match we cache that null result too (as ""),
- * so we don't repeatedly burn a Places call on the same dead query.
+ * If Places returns no match, cache that null result too (as ""),
+ * so don't repeatedly burn a Places call on the same dead query.
  *
- * If the Places key is missing or the API errors, we DON'T cache —
- * the caller falls back to a string key for that one request and we
+ * If the Places key is missing or the API errors, DON'T cache —
+ * the caller falls back to a string key for that one request and
  * try again next time.
  */
 import { findPlaceId } from "./scrapers/googleReviews.js";
