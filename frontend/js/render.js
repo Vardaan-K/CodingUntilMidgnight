@@ -80,29 +80,53 @@ export function renderTagPill(subtag) {
 
 // ── Source icon by name keyword ───────────────────────────────────────────────
 
-// Brand colors for source platforms
-const SOURCE_BRANDS = {
-  glassdoor:   { color: "#0CAA41", icon: `<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12c0 4.84 3.44 8.87 8 9.8V15H8v-3h2V9.5C10 7.57 11.57 6 13.5 6H16v3h-2c-.55 0-1 .45-1 1v2h3v3h-3v6.95c5.05-.5 9-4.76 9-9.95 0-5.52-4.48-10-10-10z"/></svg>` },
-  google:      { color: "#4285F4", icon: `<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg>` },
-  yelp:        { color: "#D32323", icon: `<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg>` },
-  tripadvisor: { color: "#00AA6C", icon: `<svg width="14" height="13" viewBox="0 0 28 24" fill="currentColor"><circle cx="7" cy="12" r="5"/><circle cx="21" cy="12" r="5"/><circle cx="7" cy="12" r="2" fill="white"/><circle cx="21" cy="12" r="2" fill="white"/><path d="M7 7C10 4 18 4 21 7" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>` },
-  reddit:      { color: "#FF4500", icon: `<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10"/><path d="M17.5 12a1.5 1.5 0 0 0-2.5-1.1A7.5 7.5 0 0 0 12 10a7.5 7.5 0 0 0-3-.61A1.5 1.5 0 1 0 6.5 12a3.9 3.9 0 0 0 .12 1 4 4 0 0 0 4.6 2.8 1 1 0 0 0 1.56 0 4 4 0 0 0 4.6-2.8 3.9 3.9 0 0 0 .12-1z" fill="white"/><circle cx="9.5" cy="12" r="1" fill="currentColor"/><circle cx="14.5" cy="12" r="1" fill="currentColor"/><path d="M10 15s.5.5 2 .5 2-.5 2-.5" fill="none" stroke="currentColor" stroke-width="0.8" stroke-linecap="round"/><circle cx="16.5" cy="6.5" r="1.5"/></svg>` },
-  indeed:      { color: "#2164F3", icon: `<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="4" width="18" height="16" rx="1"/><line x1="3" y1="10" x2="21" y2="10" stroke="white" stroke-width="1.5"/></svg>` },
+// SVG icon paths (13×13)
+const ICON = {
+  star:      `<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg>`,
+  building:  `<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M3 21V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v16H3z"/><path d="M9 21V12h6v9" fill="white"/><rect x="7" y="7" width="3" height="3" fill="white"/><rect x="14" y="7" width="3" height="3" fill="white"/></svg>`,
+  newspaper: `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 3h16a1 1 0 0 1 1 1v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4a1 1 0 0 1 1-1z"/><line x1="8" y1="8" x2="16" y2="8"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="16" x2="13" y2="16"/></svg>`,
+  reddit:    `<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10"/><circle cx="8.5" cy="13" r="1.2" fill="white"/><circle cx="15.5" cy="13" r="1.2" fill="white"/><path d="M9 16.5c.8.6 1.4.8 3 .8s2.2-.2 3-.8" fill="none" stroke="white" stroke-width="1" stroke-linecap="round"/><ellipse cx="12" cy="11.5" rx="4" ry="2.5" fill="none" stroke="white" stroke-width="1.2"/><circle cx="17" cy="6" r="1.5"/></svg>`,
+  osha:      `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 2 19h20L12 2z"/><line x1="12" y1="9" x2="12" y2="13"/><circle cx="12" cy="16" r="1" fill="currentColor"/></svg>`,
 };
+
+// Exact platform match → brand color + icon
+const PLATFORMS = [
+  { match: "glassdoor",   color: "#0CAA41", icon: ICON.building  },
+  { match: "google",      color: "#4285F4", icon: ICON.star      },
+  { match: "yelp",        color: "#D32323", icon: ICON.star      },
+  { match: "tripadvisor", color: "#00AA6C", icon: ICON.star      },
+  { match: "reddit",      color: "#FF4500", icon: ICON.reddit    },
+  { match: "indeed",      color: "#2164F3", icon: ICON.building  },
+];
+
+// Keyword fallback → semantic icon in grey
+const NEWS_KEYWORDS = ["news","tribune","times","herald","post","journal","press","gazette","report","bbc","cnn","nbc","abc","npr","wire","media","daily","weekly","chronicle","record","observer","monitor","dispatch","review","bulletin","register","examiner","sentinel","globe","sun","star","mirror","guardian","telegraph","independent"];
+const GOV_KEYWORDS  = ["dept","department","gov","health","osha","labor","court","agency","city","county","state","federal","public","municipal"];
 
 function sourceIconData(sourceName) {
   const n = (sourceName || "").toLowerCase();
-  for (const [key, brand] of Object.entries(SOURCE_BRANDS)) {
-    if (n.includes(key)) {
-      return {
-        color: brand.color,
-        icon: `<span style="color:${brand.color};display:flex;align-items:center;">${brand.icon}</span>`,
-      };
+
+  // 1. Known platforms
+  for (const p of PLATFORMS) {
+    if (n.includes(p.match)) {
+      return { color: p.color, icon: `<span style="color:${p.color};display:flex;align-items:center;">${p.icon}</span>` };
     }
   }
+
+  // 2. News source
+  if (NEWS_KEYWORDS.some(k => n.includes(k))) {
+    return { color: null, icon: ICON.newspaper };
+  }
+
+  // 3. Government / official
+  if (GOV_KEYWORDS.some(k => n.includes(k))) {
+    return { color: null, icon: ICON.osha };
+  }
+
+  // 4. Generic
   return {
     color: null,
-    icon: `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>`,
+    icon: `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15 15 0 0 1 0 20M12 2a15 15 0 0 0 0 20"/></svg>`,
   };
 }
 
