@@ -10,11 +10,8 @@ function client() {
 }
 
 export async function analyze(query, classified) {
-  // Format classified items for the LLM
   const formatItems = (items) => items.map(i => `[${i.sentiment}] ${i.content} (${i.source})`).join("\n");
-
   const sourceList = classified.sources.map(s => `${s.title}: ${s.url}`).join("\n");
-
   const context = `IDENTITY findings:\n${formatItems(classified.byTag.identity)}\n\nOPERATIONS findings:\n${formatItems(classified.byTag.operations)}\n\nSAFETY findings:\n${formatItems(classified.byTag.safety)}\n\nAVAILABLE SOURCES (use exact URLs):\n${sourceList}`;
 
   const response = await client().chat.completions.create({
@@ -29,11 +26,27 @@ export async function analyze(query, classified) {
   return parseXml(text, query, classified.sources);
 }
 
+function parseSignal(block) {
+  const text = block.match(/<text>([\s\S]*?)<\/text>/)?.[1]?.trim();
+  if (text) {
+    return {
+      text,
+      sentiment:   block.match(/<sentiment>(.*?)<\/sentiment>/)?.[1]?.trim()   || "neutral",
+      subtag:      block.match(/<subtag>(.*?)<\/subtag>/)?.[1]?.trim()         || "",
+      source_name: block.match(/<source_name>(.*?)<\/source_name>/)?.[1]?.trim() || "",
+      source_url:  block.match(/<source_url>(.*?)<\/source_url>/)?.[1]?.trim()   || "",
+    };
+  }
+  // fallback: plain text signal (backward compat)
+  return { text: block.trim(), sentiment: "neutral", subtag: "", source_name: "", source_url: "" };
+}
+
 function parseCategory(text, tag) {
   const block = text.match(new RegExp(`<${tag}>([\\s\\S]*?)</${tag}>`))?.[1] || "";
-  const score = parseInt(block.match(/<score>(.*?)<\/score>/)?.[1]) || 0;
+  const score   = parseInt(block.match(/<score>(.*?)<\/score>/)?.[1]) || 0;
   const summary = block.match(/<summary>([\s\S]*?)<\/summary>/)?.[1]?.trim() || "";
-  const signals = [...block.matchAll(/<signal>([\s\S]*?)<\/signal>/g)].map(m => m[1].trim());
+  const signalBlocks = [...block.matchAll(/<signal>([\s\S]*?)<\/signal>/g)].map(m => m[1]);
+  const signals = signalBlocks.map(parseSignal);
   return { score, summary, signals };
 }
 
@@ -41,36 +54,37 @@ function parseXml(text, query, fallbackSources) {
   try {
     const get = (tag) => text.match(new RegExp(`<${tag}>([\\s\\S]*?)</${tag}>`))?.[1]?.trim() || "";
 
-    const name = get("name") || query;
+    const name    = get("name")    || query;
     const address = get("address") || "";
-    const discrimination = parseCategory(text, "identity");
+    const identity   = parseCategory(text, "identity");
     const operations = parseCategory(text, "operations");
-    const safety = parseCategory(text, "safety");
+    const safety     = parseCategory(text, "safety");
 
-    const finalBlock = text.match(/<final>([\s\S]*?)<\/final>/)?.[1] || "";
-    const finalScore = parseInt(finalBlock.match(/<score>(.*?)<\/score>/)?.[1]) || Math.round((discrimination.score + operations.score + safety.score) / 3);
+    const finalBlock   = text.match(/<final>([\s\S]*?)<\/final>/)?.[1] || "";
+    const finalScore   = parseInt(finalBlock.match(/<score>(.*?)<\/score>/)?.[1])
+      || Math.round((identity.score + operations.score + safety.score) / 3);
     const finalSummary = finalBlock.match(/<summary>([\s\S]*?)<\/summary>/)?.[1]?.trim() || "";
 
     const sourceBlocks = [...text.matchAll(/<source>([\s\S]*?)<\/source>/g)].map(m => m[1]);
     const sources = sourceBlocks.map(s => ({
-      url: s.match(/<url>(.*?)<\/url>/)?.[1] || "",
-      title: s.match(/<title>(.*?)<\/title>/)?.[1] || ""
+      url:   s.match(/<url>(.*?)<\/url>/)?.[1]   || "",
+      title: s.match(/<title>(.*?)<\/title>/)?.[1] || "",
     })).filter(s => s.url);
 
     return {
       name, address,
-      identity: discrimination, operations, safety,
+      identity, operations, safety,
       final: { score: finalScore, summary: finalSummary },
-      sources: sources.length ? sources : fallbackSources
+      sources: sources.length ? sources : fallbackSources,
     };
   } catch {
     return {
       name: query, address: "",
-      discrimination: { score: 0, summary: "", signals: [] },
+      identity:   { score: 0, summary: "", signals: [] },
       operations: { score: 0, summary: "", signals: [] },
-      safety: { score: 0, summary: "", signals: [] },
+      safety:     { score: 0, summary: "", signals: [] },
       final: { score: 0, summary: text.slice(0, 300) },
-      sources: fallbackSources
+      sources: fallbackSources,
     };
   }
 }
