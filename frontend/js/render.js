@@ -80,15 +80,30 @@ export function renderTagPill(subtag) {
 
 // ── Source icon by name keyword ───────────────────────────────────────────────
 
-function sourceIcon(sourceName) {
+// Brand colors for source platforms
+const SOURCE_BRANDS = {
+  glassdoor:   { color: "#0CAA41", icon: `<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12c0 4.84 3.44 8.87 8 9.8V15H8v-3h2V9.5C10 7.57 11.57 6 13.5 6H16v3h-2c-.55 0-1 .45-1 1v2h3v3h-3v6.95c5.05-.5 9-4.76 9-9.95 0-5.52-4.48-10-10-10z"/></svg>` },
+  google:      { color: "#4285F4", icon: `<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg>` },
+  yelp:        { color: "#D32323", icon: `<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg>` },
+  tripadvisor: { color: "#00AA6C", icon: `<svg width="14" height="13" viewBox="0 0 28 24" fill="currentColor"><circle cx="7" cy="12" r="5"/><circle cx="21" cy="12" r="5"/><circle cx="7" cy="12" r="2" fill="white"/><circle cx="21" cy="12" r="2" fill="white"/><path d="M7 7C10 4 18 4 21 7" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>` },
+  reddit:      { color: "#FF4500", icon: `<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10"/><path d="M17.5 12a1.5 1.5 0 0 0-2.5-1.1A7.5 7.5 0 0 0 12 10a7.5 7.5 0 0 0-3-.61A1.5 1.5 0 1 0 6.5 12a3.9 3.9 0 0 0 .12 1 4 4 0 0 0 4.6 2.8 1 1 0 0 0 1.56 0 4 4 0 0 0 4.6-2.8 3.9 3.9 0 0 0 .12-1z" fill="white"/><circle cx="9.5" cy="12" r="1" fill="currentColor"/><circle cx="14.5" cy="12" r="1" fill="currentColor"/><path d="M10 15s.5.5 2 .5 2-.5 2-.5" fill="none" stroke="currentColor" stroke-width="0.8" stroke-linecap="round"/><circle cx="16.5" cy="6.5" r="1.5"/></svg>` },
+  indeed:      { color: "#2164F3", icon: `<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="4" width="18" height="16" rx="1"/><line x1="3" y1="10" x2="21" y2="10" stroke="white" stroke-width="1.5"/></svg>` },
+};
+
+function sourceIconData(sourceName) {
   const n = (sourceName || "").toLowerCase();
-  if (n.includes("glassdoor"))   return `<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12c0 4.84 3.44 8.87 8 9.8V15H8v-3h2V9.5C10 7.57 11.57 6 13.5 6H16v3h-2c-.55 0-1 .45-1 1v2h3v3h-3v6.95c5.05-.5 9-4.76 9-9.95 0-5.52-4.48-10-10-10z"/></svg>`;
-  if (n.includes("google"))      return `<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg>`;
-  if (n.includes("yelp"))        return `<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg>`;
-  if (n.includes("tripadvisor")) return `<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3" fill="#FAFAF7"/></svg>`;
-  if (n.includes("reddit"))      return `<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3" fill="#FAFAF7"/></svg>`;
-  if (n.includes("indeed"))      return `<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="4" width="18" height="16" rx="1"/><line x1="3" y1="10" x2="21" y2="10" stroke="#FAFAF7" stroke-width="1.5"/></svg>`;
-  return `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>`;
+  for (const [key, brand] of Object.entries(SOURCE_BRANDS)) {
+    if (n.includes(key)) {
+      return {
+        color: brand.color,
+        icon: `<span style="color:${brand.color};display:flex;align-items:center;">${brand.icon}</span>`,
+      };
+    }
+  }
+  return {
+    color: null,
+    icon: `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>`,
+  };
 }
 
 // ── Signal card ───────────────────────────────────────────────────────────────
@@ -97,11 +112,12 @@ export function renderSignalCard(signal) {
   const { text, sentiment = "neutral", subtag, source_name, source_url } = signal;
   const pillLabel = sentiment === "positive" ? "POSITIVE" : sentiment === "negative" ? "NEGATIVE" : "NEUTRAL";
   const tag = subtag ? renderTagPill(subtag) : "";
-  const icon = sourceIcon(source_name);
+  const { icon, color } = sourceIconData(source_name);
+  const nameStyle = color ? `style="color:${color}"` : "";
   const sourceEl = source_url
-    ? `<a class="source-line" href="${source_url}" target="_blank" rel="noopener">${icon}<span>${source_name || "Source"}</span></a>`
+    ? `<a class="source-line" href="${source_url}" target="_blank" rel="noopener">${icon}<span ${nameStyle}>${source_name || "Source"}</span></a>`
     : source_name
-      ? `<span class="source-line">${icon}<span>${source_name}</span></span>`
+      ? `<span class="source-line">${icon}<span ${nameStyle}>${source_name}</span></span>`
       : "";
 
   return `
