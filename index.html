@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Whistleblower / SLO DOCO</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: #FAFAF7;
+    --ink: #0A0A0A;
+    --ink-2: #2A2A2A;
+    --ink-3: #5A5A5A;
+    --ink-4: #8B8B85;
+    --line-soft: #D8D5CC;
+    --line-faint: #EFEDE5;
+    --red: #C8242C;
+    --red-paper: #FBE8E5;
+    --amber: #B07308;
+    --amber-paper: #FAF1DA;
+    --green: #2D7A3E;
+    --green-paper: #E4F0E5;
+    --blue: #1E5FAD;
+    --blue-paper: #E2ECF8;
+  }
+  * { box-sizing: border-box; }
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Inter', sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  .serif { font-family: 'Instrument Serif', serif; font-weight: 400; letter-spacing: -0.01em; }
+  .mono { font-family: 'JetBrains Mono', monospace; font-feature-settings: 'tnum'; }
+  .tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--ink-3);
+  }
+  .num-display {
+    font-family: 'Instrument Serif', serif;
+    font-feature-settings: 'tnum';
+    letter-spacing: -0.05em;
+    line-height: 0.85;
+  }
+  .ink-3 { color: var(--ink-3); }
+  .ink-4 { color: var(--ink-4); }
+  .border-line { border-color: var(--ink); }
+  .border-soft { border-color: var(--line-soft); }
+  .border-faint { border-color: var(--line-faint); }
+
+  .signal-card {
+    border-left: 3px solid var(--line-soft);
+    padding: 16px 0 16px 16px;
+    margin-bottom: 4px;
+  }
+  .signal-card.negative { border-left-color: var(--red); }
+  .signal-card.positive { border-left-color: var(--green); }
+
+  .impact-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 500;
+    padding: 3px 8px;
+    border-radius: 3px;
+    line-height: 1;
+  }
+  .impact-pill.negative { background: var(--red-paper); color: var(--red); }
+  .impact-pill.positive { background: var(--green-paper); color: var(--green); }
+
+  .tag-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 3px 8px 3px 6px;
+    border-radius: 3px;
+    line-height: 1;
+    background: var(--line-faint);
+    color: var(--ink-2);
+    font-weight: 500;
+  }
+  .tag-pill svg { flex-shrink: 0; }
+
+  .tag-pill.lgbtq {
+    background: linear-gradient(90deg, #E63946, #F4A261, #E9C46A, #2A9D8F, #5E60CE);
+    color: white;
+    padding: 3px 8px;
+  }
+  .tag-pill.accessibility { background: var(--blue-paper); color: var(--blue); }
+  .tag-pill.race { background: #F2E2CC; color: #6B4423; }
+  .tag-pill.wages { background: var(--amber-paper); color: var(--amber); }
+  .tag-pill.health { background: var(--red-paper); color: var(--red); }
+  .tag-pill.harassment { background: #F0E0E8; color: #7A2B4E; }
+  .tag-pill.environment { background: var(--green-paper); color: var(--green); }
+  .tag-pill.recognition { background: var(--green-paper); color: var(--green); }
+  .tag-pill.improvement { background: var(--green-paper); color: var(--green); }
+
+  .category-score-bar {
+    height: 4px;
+    background: var(--line-faint);
+    overflow: hidden;
+    border-radius: 2px;
+  }
+  .category-score-bar > div { height: 100%; }
+
+  .source-line {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--ink-3);
+  }
+  .source-line svg { flex-shrink: 0; }
+
+  .grade-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px 6px 6px;
+    background: var(--red);
+    color: white;
+    border-radius: 4px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+  .grade-letter {
+    font-family: 'Instrument Serif', serif;
+    font-size: 22px;
+    line-height: 1;
+    background: white;
+    color: var(--red);
+    width: 28px; height: 28px;
+    border-radius: 3px;
+    display: flex; align-items: center; justify-content: center;
+    letter-spacing: 0;
+  }
+
+  .score-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    font-weight: 500;
+    color: var(--ink);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .score-label::before {
+    content: '';
+    width: 16px;
+    height: 1px;
+    background: var(--ink);
+  }
+</style>
+</head>
+<body>
+
+<header class="border-b border-line">
+  <div class="max-w-[1400px] mx-auto px-10 py-5 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <div class="w-6 h-6 bg-[var(--ink)] flex items-center justify-center">
+        <div class="w-1.5 h-1.5 bg-[var(--paper)]"></div>
+      </div>
+      <span class="serif text-xl">Whistleblower</span>
+    </div>
+    <div class="flex items-center gap-10 text-sm">
+      <a href="#" class="hover:underline">Browse businesses</a>
+      <a href="#" class="hover:underline">How it works</a>
+      <a href="#" class="hover:underline">About</a>
+    </div>
+    <div class="flex items-center gap-2 px-3 py-1.5 border border-soft rounded-full bg-white text-sm w-64">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="ink-3"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+      <input class="bg-transparent outline-none flex-1" placeholder="Search a business..." />
+    </div>
+  </div>
+</header>
+
+<main class="max-w-[1400px] mx-auto px-10 py-10">
+
+  <section class="grid grid-cols-12 gap-10 mb-12 pb-12 border-b border-line items-center">
+
+    <!-- LEFT: Business identity -->
+    <div class="col-span-8">
+      <div class="flex items-center gap-4 mb-6">
+        <img src="https://assets.simpleviewinc.com/simpleview/image/upload/crm/slocal/SLODOCO0-f475514b5056a36_f47552b7-5056-a36a-0b0a7b07ccd7d29e.jpg" alt="SLO DOCO storefront" class="w-24 h-24 object-cover rounded" />
+        <img src="https://d2q79iu7y748jz.cloudfront.net/s/_logo/9f94f2854f830f6ca3b1ba0ba4dfec20" alt="SLO DOCO logo" class="w-24 h-24 object-contain rounded bg-white" />
+        <div class="ml-2">
+          <div class="tag mb-1">DONUT SHOP · SAN LUIS OBISPO, CA</div>
+          <h1 class="serif text-[56px] leading-none">SLO DOCO</h1>
+        </div>
+      </div>
+
+      <p class="serif text-2xl leading-[1.35]" style="color: var(--ink-2);">
+        Workers report unpaid overtime across three locations. Same-sex couples have flagged seating discrimination. Two health code citations this month.
+      </p>
+    </div>
+
+    <!-- RIGHT: Score -->
+    <div class="col-span-4 border-l border-soft pl-10">
+      <div class="score-label mb-4">WHISTLEBLOWER SCORE</div>
+
+      <div class="flex items-baseline gap-3 mb-3">
+        <span class="num-display text-[140px]" style="color: var(--red);">42</span>
+        <span class="mono text-sm ink-3">/100</span>
+      </div>
+
+      <div class="flex items-center gap-3 mb-4">
+        <span class="grade-badge">
+          <span class="grade-letter">F</span>
+          <span>GRADE</span>
+        </span>
+        <span class="serif italic text-xl" style="color: var(--red);">Concerning</span>
+      </div>
+
+      <div class="text-xs ink-3 leading-relaxed mono">
+        Based on 347 signals from 8 sources.
+      </div>
+    </div>
+
+  </section>
+
+  <section class="grid grid-cols-3 gap-8">
+
+    <!-- COLUMN 1: DISCRIMINATION -->
+    <div class="border-t-2 border-line pt-6">
+      <div class="flex items-baseline justify-between mb-2">
+        <h2 class="serif text-4xl">Discrimination</h2>
+        <span class="num-display text-5xl" style="color: var(--red);">31</span>
+      </div>
+      <div class="category-score-bar mb-4">
+        <div style="width: 31%; background: var(--red);"></div>
+      </div>
+      <p class="text-sm ink-3 mb-6 leading-relaxed">
+        Unfair treatment based on who someone is — race, gender, sexuality, religion, disability, age.
+      </p>
+
+      <div class="space-y-1">
+
+        <div class="signal-card negative">
+          <div class="flex items-center gap-2 mb-2 flex-wrap">
+            <span class="impact-pill negative">− 4.6 pts</span>
+            <span class="tag-pill lgbtq">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M3 17c0-5 4-9 9-9s9 4 9 9"/></svg>
+              LGBTQ+
+            </span>
+          </div>
+          <p class="text-[15px] leading-snug mb-2">
+            Former employee alleges management used slurs toward LGBTQ+ staff. Three other employees corroborate.
+          </p>
+          <div class="source-line">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12c0 4.84 3.44 8.87 8 9.8V15H8v-3h2V9.5C10 7.57 11.57 6 13.5 6H16v3h-2c-.55 0-1 .45-1 1v2h3v3h-3v6.95c5.05-.5 9-4.76 9-9.95 0-5.52-4.48-10-10-10z"/></svg>
+            <span>Glassdoor</span>
+            <span class="ink-4">·</span>
+            <span>5d ago</span>
+          </div>
+        </div>
+
+        <div class="signal-card negative">
+          <div class="flex items-center gap-2 mb-2 flex-wrap">
+            <span class="impact-pill negative">− 1.8 pts</span>
+            <span class="tag-pill lgbtq">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M3 17c0-5 4-9 9-9s9 4 9 9"/></svg>
+              LGBTQ+
+            </span>
+          </div>
+          <p class="text-[15px] leading-snug mb-2">
+            Same-sex couple reports being ignored at the counter while other customers were served around them.
+          </p>
+          <div class="source-line">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg>
+            <span>Google Reviews · 1★</span>
+            <span class="ink-4">·</span>
+            <span>1w ago</span>
+          </div>
+        </div>
+
+        <div class="signal-card negative">
+          <div class="flex items-center gap-2 mb-2 flex-wrap">
+            <span class="impact-pill negative">− 1.2 pts</span>
+            <span class="tag-pill race">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-7 8-7s8 3 8 7"/></svg>
+              Race
+            </span>
+          </div>
+          <p class="text-[15px] leading-snug mb-2">
+            Customer reports being asked to pay upfront when other customers weren't. Manager dismissed complaint.
+          </p>
+          <div class="source-line">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg>
+            <span>Yelp · 1★</span>
+            <span class="ink-4">·</span>
+            <span>2w ago</span>
+          </div>
+        </div>
+
+        <div class="signal-card negative">
+          <div class="flex items-center gap-2 mb-2 flex-wrap">
+            <span class="impact-pill negative">− 0.8 pts</span>
+            <span class="tag-pill accessibility">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="4" r="2"/><path d="M19 13v-2a7 7 0 1 0-14 0v2"/><circle cx="12" cy="19" r="3"/></svg>
+              Accessibility
+            </span>
+          </div>
+          <p class="text-[15px] leading-snug mb-2">
+            Wheelchair user reports staff was reluctant to move tables to create access path.
+          </p>
+          <div class="source-line">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3" fill="#FAFAF7"/></svg>
+            <span>Reddit · r/disability</span>
+            <span class="ink-4">·</span>
+            <span>3w ago</span>
+          </div>
+        </div>
+
+      </div>
+
+      <button class="mt-4 text-sm ink-3 hover:text-[var(--ink)] underline">
+        View all 6 signals →
+      </button>
+    </div>
+
+    <!-- COLUMN 2: OPERATIONS -->
+    <div class="border-t-2 border-line pt-6">
+      <div class="flex items-baseline justify-between mb-2">
+        <h2 class="serif text-4xl">Operations</h2>
+        <span class="num-display text-5xl" style="color: var(--red);">28</span>
+      </div>
+      <div class="category-score-bar mb-4">
+        <div style="width: 28%; background: var(--red);"></div>
+      </div>
+      <p class="text-sm ink-3 mb-6 leading-relaxed">
+        How the business runs day to day — wages, hiring, management practices, treatment of workers.
+      </p>
+
+      <div class="space-y-1">
+
+        <div class="signal-card negative">
+          <div class="flex items-center gap-2 mb-2 flex-wrap">
+            <span class="impact-pill negative">− 3.2 pts</span>
+            <span class="tag-pill wages">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+              Wage theft
+            </span>
+          </div>
+          <p class="text-[15px] leading-snug mb-2">
+            Multiple employees report unpaid overtime, with screenshots of altered timecards in a 400-comment thread.
+          </p>
+          <div class="source-line">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3" fill="#FAFAF7"/></svg>
+            <span>Reddit · r/antiwork</span>
+            <span class="ink-4">·</span>
+            <span>3d ago</span>
+          </div>
+        </div>
+
+        <div class="signal-card negative">
+          <div class="flex items-center gap-2 mb-2 flex-wrap">
+            <span class="impact-pill negative">− 2.8 pts</span>
+            <span class="tag-pill harassment">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4M12 17h.01"/><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>
+              Hostile mgmt
+            </span>
+          </div>
+          <p class="text-[15px] leading-snug mb-2">
+            Five former employees describe retaliatory behavior after raising concerns. Pattern across two locations.
+          </p>
+          <div class="source-line">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12c0 4.84 3.44 8.87 8 9.8V15H8v-3h2V9.5C10 7.57 11.57 6 13.5 6H16v3h-2c-.55 0-1 .45-1 1v2h3v3h-3v6.95c5.05-.5 9-4.76 9-9.95 0-5.52-4.48-10-10-10z"/></svg>
+            <span>Glassdoor · 1★</span>
+            <span class="ink-4">·</span>
+            <span>1w ago</span>
+          </div>
+        </div>
+
+        <div class="signal-card negative">
+          <div class="flex items-center gap-2 mb-2 flex-wrap">
+            <span class="impact-pill negative">− 2.1 pts</span>
+            <span class="tag-pill wages">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+              Wage theft
+            </span>
+          </div>
+          <p class="text-[15px] leading-snug mb-2">
+            Employee alleges tips being pooled and redistributed without notice. Three corroborations in comments.
+          </p>
+          <div class="source-line">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="4" width="18" height="16" rx="1"/><line x1="3" y1="10" x2="21" y2="10" stroke="#FAFAF7" stroke-width="1.5"/></svg>
+            <span>Indeed · 2★</span>
+            <span class="ink-4">·</span>
+            <span>2w ago</span>
+          </div>
+        </div>
+
+        <div class="signal-card positive">
+          <div class="flex items-center gap-2 mb-2 flex-wrap">
+            <span class="impact-pill positive">+ 1.4 pts</span>
+            <span class="tag-pill recognition">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              Recognition
+            </span>
+          </div>
+          <p class="text-[15px] leading-snug mb-2">
+            Long-tenured baker (12 yrs) writes positive review citing fair scheduling and reasonable management.
+          </p>
+          <div class="source-line">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="4" width="18" height="16" rx="1"/><line x1="3" y1="10" x2="21" y2="10" stroke="#FAFAF7" stroke-width="1.5"/></svg>
+            <span>Indeed · 5★</span>
+            <span class="ink-4">·</span>
+            <span>3w ago</span>
+          </div>
+        </div>
+
+      </div>
+
+      <button class="mt-4 text-sm ink-3 hover:text-[var(--ink)] underline">
+        View all 5 signals →
+      </button>
+    </div>
+
+    <!-- COLUMN 3: SAFETY -->
+    <div class="border-t-2 border-line pt-6">
+      <div class="flex items-baseline justify-between mb-2">
+        <h2 class="serif text-4xl">Safety</h2>
+        <span class="num-display text-5xl" style="color: var(--amber);">54</span>
+      </div>
+      <div class="category-score-bar mb-4">
+        <div style="width: 54%; background: var(--amber);"></div>
+      </div>
+      <p class="text-sm ink-3 mb-6 leading-relaxed">
+        Physical harm or health risks — food safety, working conditions, harmful materials, product issues.
+      </p>
+
+      <div class="space-y-1">
+
+        <div class="signal-card negative">
+          <div class="flex items-center gap-2 mb-2 flex-wrap">
+            <span class="impact-pill negative">− 2.1 pts</span>
+            <span class="tag-pill health">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+              Health code
+            </span>
+          </div>
+          <p class="text-[15px] leading-snug mb-2">
+            Citation at downtown location for repeated food safety infractions including improper storage temps.
+          </p>
+          <div class="source-line">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M4 4h16v3H4zM4 9h16v2H4zM4 13h10v2H4zM4 17h10v2H4zM16 13h4v6h-4z"/></svg>
+            <span>SLO Tribune</span>
+            <span class="ink-4">·</span>
+            <span>2w ago</span>
+          </div>
+        </div>
+
+        <div class="signal-card negative">
+          <div class="flex items-center gap-2 mb-2 flex-wrap">
+            <span class="impact-pill negative">− 1.4 pts</span>
+            <span class="tag-pill environment">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 4 13c0-5 7-13 7-13s7 8 7 13a7 7 0 0 1-7 7z"/></svg>
+              Materials
+            </span>
+          </div>
+          <p class="text-[15px] leading-snug mb-2">
+            Receipts found to use older thermal paper containing BPA. Confirmed via supplier records.
+          </p>
+          <div class="source-line">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3" fill="#FAFAF7"/></svg>
+            <span>Reddit · r/zerowaste</span>
+            <span class="ink-4">·</span>
+            <span>4w ago</span>
+          </div>
+        </div>
+
+        <div class="signal-card negative">
+          <div class="flex items-center gap-2 mb-2 flex-wrap">
+            <span class="impact-pill negative">− 0.9 pts</span>
+            <span class="tag-pill health">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+              Food safety
+            </span>
+          </div>
+          <p class="text-[15px] leading-snug mb-2">
+            Customer reports finding hair in donut. Manager refused to comp the order. Two similar reviews this quarter.
+          </p>
+          <div class="source-line">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg>
+            <span>Yelp · 1★</span>
+            <span class="ink-4">·</span>
+            <span>5w ago</span>
+          </div>
+        </div>
+
+        <div class="signal-card positive">
+          <div class="flex items-center gap-2 mb-2 flex-wrap">
+            <span class="impact-pill positive">+ 2.3 pts</span>
+            <span class="tag-pill improvement">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              Improvement
+            </span>
+          </div>
+          <p class="text-[15px] leading-snug mb-2">
+            Health inspection at second location returned passing grade after previous citation. Issues resolved.
+          </p>
+          <div class="source-line">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><rect x="4" y="3" width="16" height="18" rx="1"/><line x1="8" y1="8" x2="16" y2="8" stroke="#FAFAF7" stroke-width="1.5"/><line x1="8" y1="12" x2="16" y2="12" stroke="#FAFAF7" stroke-width="1.5"/><line x1="8" y1="16" x2="12" y2="16" stroke="#FAFAF7" stroke-width="1.5"/></svg>
+            <span>SLO Health Dept.</span>
+            <span class="ink-4">·</span>
+            <span>6w ago</span>
+          </div>
+        </div>
+
+      </div>
+
+      <button class="mt-4 text-sm ink-3 hover:text-[var(--ink)] underline">
+        View all 4 signals →
+      </button>
+    </div>
+
+  </section>
+
+  <section class="mt-20 pt-10 border-t border-soft">
+    <div class="grid grid-cols-12 gap-10">
+      <div class="col-span-4">
+        <div class="tag mb-3">METHODOLOGY</div>
+        <p class="text-sm ink-3 leading-relaxed">
+          Every signal comes from a public source. The score updates as new signals are found. Anyone can trace a score back to its receipts.
+        </p>
+      </div>
+      <div class="col-span-8 grid grid-cols-4 gap-6">
+        <div>
+          <div class="num-display text-3xl mb-1">347</div>
+          <div class="tag">SIGNALS</div>
+        </div>
+        <div>
+          <div class="num-display text-3xl mb-1">8</div>
+          <div class="tag">SOURCES</div>
+        </div>
+        <div>
+          <div class="num-display text-3xl mb-1">14</div>
+          <div class="tag">INCIDENTS</div>
+        </div>
+        <div>
+          <div class="num-display text-3xl mb-1">3</div>
+          <div class="tag">PATTERNS FOUND</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="border-t border-line mt-20">
+  <div class="max-w-[1400px] mx-auto px-10 py-6 flex items-center justify-between mono text-xs ink-3">
+    <div>WHISTLEBLOWER</div>
+    <div class="flex gap-6">
+      <a href="#" class="hover:text-[var(--ink)]">For businesses</a>
+      <a href="#" class="hover:text-[var(--ink)]">Methodology</a>
+      <a href="#" class="hover:text-[var(--ink)]">Contact</a>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
