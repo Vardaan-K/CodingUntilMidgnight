@@ -15,15 +15,15 @@
 <!-- ── Header ──────────────────────────────────────────────────────────────── -->
 <header class="border-b border-line">
   <div class="max-w-[1400px] mx-auto px-10 py-5 flex items-center justify-between">
-    <a href="search.html" class="flex items-center gap-3" style="text-decoration:none;color:inherit">
+    <a href="search" class="flex items-center gap-3" style="text-decoration:none;color:inherit">
       <div class="w-6 h-6 bg-[var(--ink)] flex items-center justify-center">
         <div class="w-1.5 h-1.5 bg-[var(--paper)]"></div>
       </div>
       <span class="serif text-xl">Whistleblower</span>
     </a>
     <div class="flex items-center gap-10 text-sm">
-      <a href="search.html" class="hover:underline">Browse businesses</a>
-      <a href="search.html" class="hover:underline">How it works</a>
+      <a href="search" class="hover:underline">Browse businesses</a>
+      <a href="search" class="hover:underline">How it works</a>
       <a href="#" class="hover:underline">About</a>
     </div>
     <!-- Mini search → redirects to landing -->
@@ -39,7 +39,7 @@
   <div class="num-display text-6xl mb-4" style="color:var(--ink-4)">!</div>
   <h2 class="serif text-4xl mb-3">Something went wrong</h2>
   <p class="text-sm ink-3 mb-6" id="error-message">Could not load business data.</p>
-  <a href="search.html" class="btn-primary" style="display:inline-block;text-decoration:none">← Back to search</a>
+  <a href="search" class="btn-primary" style="display:inline-block;text-decoration:none">← Back to search</a>
 </div>
 
 <!-- ── Main content ───────────────────────────────────────────────────────── -->
@@ -171,7 +171,7 @@
 
   // Navigate back to search on header click
   document.getElementById("header-search-trigger")?.addEventListener("click", () => {
-    window.location.href = "search.html";
+    window.location.href = "search";
   });
 
   // Write grade back to recent searches so chips show proper color
@@ -189,18 +189,26 @@
     } catch {}
   }
 
-  // Read query params or sessionStorage
-  const params   = new URLSearchParams(window.location.search);
-  const query    = params.get("query") || "";
-  const location = params.get("location") || "";
+  // Read query from URL params, fall back to sessionStorage (serve strips
+  // query strings on its .html → clean-URL redirects)
+  const params = new URLSearchParams(window.location.search);
+  let query    = params.get("query") || "";
+  let location = params.get("location") || "";
 
-  // Try to enrich from sessionStorage
+  if (!query) {
+    try {
+      const pending = JSON.parse(sessionStorage.getItem("wb_pending") || "null");
+      if (pending?.query) { query = pending.query; location = pending.location || ""; }
+    } catch {}
+  }
+  sessionStorage.removeItem("wb_pending"); // consume it
+
   let bizData = null;
   try { bizData = JSON.parse(sessionStorage.getItem("wb_business")); } catch {}
 
   if (!query) {
-    // No params — redirect back to search automatically
-    window.location.replace("search.html");
+    // Still nothing — redirect back to search
+    window.location.replace("search");
   } else {
     renderLoading();
     fetchSearch(query, location)

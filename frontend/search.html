@@ -361,7 +361,7 @@
 
     <div class="grid grid-cols-3 gap-4" id="featured-grid">
 
-      <a href="business.html?query=SLO+DOCO&location=San+Luis+Obispo%2CCalifornia%2CUnited+States" class="business-card">
+      <a href="business?query=SLO+DOCO&location=San+Luis+Obispo%2CCalifornia%2CUnited+States" class="business-card">
         <div class="flex items-start justify-between mb-3">
           <div>
             <div class="tag mb-1">DONUT SHOP · SAN LUIS OBISPO, CA</div>
@@ -626,7 +626,8 @@
   };
 
   function bizHref(name) {
-    return `business.html?query=${encodeURIComponent(name)}&location=${encodeURIComponent(SLO.canonical_name)}`;
+    // Use "business" (no .html) so serve doesn't 301-redirect and strip the query string
+    return `business?query=${encodeURIComponent(name)}&location=${encodeURIComponent(SLO.canonical_name)}`;
   }
 
   // ── Recent searches ────────────────────────────────────────────────────────
@@ -703,6 +704,12 @@
     saveSearch(name);
     renderRecent();
     document.getElementById('suggestions-dropdown').style.display = 'none';
+    // Store in sessionStorage so business.html can read it even if serve
+    // strips query params during its .html → clean-URL redirect
+    sessionStorage.setItem('wb_pending', JSON.stringify({
+      query: name,
+      location: SLO.canonical_name,
+    }));
     window.location.href = bizHref(name);
   }
 
