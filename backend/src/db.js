@@ -79,13 +79,33 @@ export const db = {
     if (!res.length) return [];
     return res[0].values.map(([place_id, data]) => {
       const parsed = JSON.parse(data);
+
+      // Collect top signal subtags (negative first, then positive, deduplicated)
+      const allSignals = [
+        ...(parsed.scores?.identity?.signals   || []),
+        ...(parsed.scores?.operations?.signals || []),
+        ...(parsed.scores?.safety?.signals     || []),
+      ];
+      const seen = new Set();
+      const topTags = [];
+      for (const s of allSignals) {
+        if (s.subtag && !seen.has(s.subtag)) {
+          seen.add(s.subtag);
+          topTags.push({ subtag: s.subtag, sentiment: s.sentiment || "neutral" });
+          if (topTags.length >= 3) break;
+        }
+      }
+
       return {
-        key: place_id,
-        name: parsed.name || parsed.query || place_id,
-        address: parsed.address || "",
-        score: parsed.final?.score ?? null,
-        query: parsed.query || "",
+        key:      place_id,
+        name:     parsed.name    || parsed.query || place_id,
+        address:  parsed.address || "",
+        score:    parsed.final?.score ?? null,
+        query:    parsed.query    || "",
         location: parsed.location || "",
+        signals:  allSignals.length,
+        sources:  (parsed.sources || []).length,
+        topTags,
       };
     });
   },
