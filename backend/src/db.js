@@ -73,5 +73,25 @@ export const db = {
     if (!res.length) return { pos: 0, neg: 0 };
     const rows = Object.fromEntries(res[0].values);
     return { pos: rows.positive || 0, neg: rows.negative || 0 };
+  },
+  listCache() {
+    const res = database.exec("SELECT place_id, data FROM cache ORDER BY rowid DESC");
+    if (!res.length) return [];
+    return res[0].values.map(([place_id, data]) => {
+      const parsed = JSON.parse(data);
+      return {
+        key: place_id,
+        name: parsed.name || parsed.query || place_id,
+        address: parsed.address || "",
+        score: parsed.final?.score ?? null,
+        query: parsed.query || "",
+        location: parsed.location || "",
+      };
+    });
+  },
+  clearAllCache() {
+    database.run("DELETE FROM cache");
+    database.run("DELETE FROM classified_cache");
+    save();
   }
 };
