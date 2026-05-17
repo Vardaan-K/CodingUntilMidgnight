@@ -5,6 +5,8 @@ import { initDb, db } from "./src/db.js";
 import { gather } from "./src/gather.js";
 import { classify } from "./src/classify.js";
 import { analyze } from "./src/analyze.js";
+import { aggregateBusinessData } from "./src/scrapers/index.js";
+import { resolvePlaceId, buildCacheKey } from "./src/resolve.js";
 
 const app = express();
 app.use(cors());
@@ -12,27 +14,44 @@ app.use(express.json());
 
 await initDb();
 
+// Health check — useful for the frontend / monitoring.
+app.get("/health", (_req, res) => res.json({ ok: true }));
+
+/**
+ * Full pipeline: gather (web search + scrapers) → classify → analyze.
+ *
+ * Cache key is the Google Places place_id when we can resolve one
+ * (so "Raku Ramen SLO" and "raku ramen, san luis obispo" share an
+ * entry, and POST /report can correctly invalidate). Falls back to
+ * a "str:query|location" key when Places isn't configured or doesn't
+ * match anything.
+ */
 app.get("/search", async (req, res) => {
-  const { query } = req.query;
+  const query = (req.query.query || "").toString().trim();
+  const location = (req.query.location || "").toString().trim();
   if (!query) return res.status(400).json({ error: "query param required" });
 
+  const placeId = await resolvePlaceId(query, location);
+  const cacheKey = buildCacheKey(placeId, query, location);
+
   try {
-    const cached = db.getCache(query);
+    const cached = db.getCache(cacheKey);
     if (cached) return res.json(cached);
 
-    // Step 1 & 2: Check classified cache or gather + classify
-    let classified = db.getClassified(query);
+    let classified = db.getClassified(cacheKey);
     if (!classified) {
-      const gathered = await gather(query);
+      const gathered = await gather(query, { location });
       classified = await classify(gathered);
-      db.setClassified(query, classified);
+      db.setClassified(cacheKey, classified);
     }
 
-    // Step 3: Analyze classified data with LLM
     const ai = await analyze(query, classified);
 
     const result = {
-      id: query,
+      id: cacheKey,
+      place_id: placeId,
+      query,
+      location: location || null,
       name: ai.name,
       address: ai.address,
       scores: {
@@ -44,16 +63,39 @@ app.get("/search", async (req, res) => {
       sources: ai.sources,
     };
 
-    db.setCache(query, result);
+    db.setCache(cacheKey, result);
     res.json(result);
   } catch (err) {
+    console.error("[/search]", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/**
+ * Raw deterministic scraper output for a business — bypasses the LLM pipeline.
+ * Useful for the frontend to render structured review/news cards directly.
+ *
+ *   GET /scrape?name=Raku+Ramen&location=San+Luis+Obispo
+ */
+app.get("/scrape", async (req, res) => {
+  const name = (req.query.name || req.query.query || "").toString().trim();
+  const location = (req.query.location || "").toString().trim();
+  if (!name) return res.status(400).json({ error: "name (or query) param required" });
+
+  try {
+    const data = await aggregateBusinessData(name, location);
+    res.json(data);
+  } catch (err) {
+    console.error("[/scrape]", err);
     res.status(500).json({ error: err.message });
   }
 });
 
 app.post("/report", (req, res) => {
   const { placeId, type, comment } = req.body;
-  if (!placeId || !["positive", "negative"].includes(type)) return res.status(400).json({ error: "placeId and type (positive|negative) required" });
+  if (!placeId || !["positive", "negative"].includes(type)) {
+    return res.status(400).json({ error: "placeId and type (positive|negative) required" });
+  }
   db.addReport(placeId, type, comment || "");
   db.clearCache(placeId);
   res.json({ success: true });
@@ -63,4 +105,5 @@ app.get("/reports/:placeId", (req, res) => {
   res.json(db.getReports(req.params.placeId));
 });
 
-app.listen(process.env.PORT || 3001, () => console.log("API running on :3001"));
+const PORT = process.env.PORT || 3001;
+app.listen(PORT, () => console.log(`API running on :${PORT}`));
