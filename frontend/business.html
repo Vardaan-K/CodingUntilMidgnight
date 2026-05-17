@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title id="page-title">Whistleblower</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- ── Header ──────────────────────────────────────────────────────────────── -->
+<header class="border-b border-line">
+  <div class="max-w-[1400px] mx-auto px-10 py-5 flex items-center justify-between">
+    <a href="search.html" class="flex items-center gap-3" style="text-decoration:none;color:inherit">
+      <div class="w-6 h-6 bg-[var(--ink)] flex items-center justify-center">
+        <div class="w-1.5 h-1.5 bg-[var(--paper)]"></div>
+      </div>
+      <span class="serif text-xl">Whistleblower</span>
+    </a>
+    <div class="flex items-center gap-10 text-sm">
+      <a href="search.html" class="hover:underline">Browse businesses</a>
+      <a href="search.html" class="hover:underline">How it works</a>
+      <a href="#" class="hover:underline">About</a>
+    </div>
+    <!-- Mini search → redirects to landing -->
+    <div class="flex items-center gap-2 px-3 py-1.5 border border-soft rounded-full bg-white text-sm w-64 cursor-text" id="header-search-trigger">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="ink-3"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+      <span class="ink-4 text-sm" id="header-search-input">Search another business…</span>
+    </div>
+  </div>
+</header>
+
+<!-- ── Error state (hidden unless shown) ─────────────────────────────────── -->
+<div id="error-state" class="hidden max-w-[1400px] mx-auto px-10 py-20 text-center">
+  <div class="num-display text-6xl mb-4" style="color:var(--ink-4)">!</div>
+  <h2 class="serif text-4xl mb-3">Something went wrong</h2>
+  <p class="text-sm ink-3 mb-6" id="error-message">Could not load business data.</p>
+  <a href="search.html" class="btn-primary" style="display:inline-block;text-decoration:none">← Back to search</a>
+</div>
+
+<!-- ── Main content ───────────────────────────────────────────────────────── -->
+<main id="main-content" class="max-w-[1400px] mx-auto px-10 py-10">
+
+  <!-- Business identity + score -->
+  <section class="grid grid-cols-12 gap-10 mb-12 pb-12 border-b border-line items-center">
+
+    <div class="col-span-8">
+      <div class="tag mb-2" id="biz-type">LOADING…</div>
+      <h1 class="serif text-[56px] leading-none mb-5" id="biz-name"></h1>
+      <p class="serif text-2xl leading-[1.35]" style="color:var(--ink-2)" id="biz-summary"></p>
+    </div>
+
+    <div class="col-span-4 border-l border-soft pl-10">
+      <div class="score-label mb-4">WHISTLEBLOWER SCORE</div>
+
+      <div class="flex items-baseline gap-3 mb-3">
+        <span class="num-display text-[140px]" id="score-number">—</span>
+        <span class="mono text-sm ink-3">/100</span>
+      </div>
+
+      <div class="flex items-center gap-3 mb-4">
+        <span class="grade-badge red" id="grade-badge">
+          <span class="grade-letter" id="grade-letter">—</span>
+          <span>GRADE</span>
+        </span>
+        <span class="serif italic text-xl" id="score-verbal"></span>
+      </div>
+
+      <div class="text-xs ink-3 leading-relaxed mono" id="score-meta">
+        <span class="loading-ring"></span> Fetching data…
+      </div>
+    </div>
+
+  </section>
+
+  <!-- Three category columns -->
+  <section class="grid grid-cols-3 gap-8" id="categories-section">
+    <div id="col-identity"></div>
+    <div id="col-operations"></div>
+    <div id="col-safety"></div>
+  </section>
+
+  <!-- Stats + methodology -->
+  <section class="mt-20 pt-10 border-t border-soft">
+    <div class="grid grid-cols-12 gap-10">
+      <div class="col-span-4">
+        <div class="tag mb-3">METHODOLOGY</div>
+        <p class="text-sm ink-3 leading-relaxed">
+          Every signal comes from a public source. The score starts at 80 and moves based on documented evidence. Anyone can trace a score back to its receipts.
+        </p>
+      </div>
+      <div class="col-span-8 grid grid-cols-3 gap-6">
+        <div>
+          <div class="num-display text-3xl mb-1" id="stat-signals">—</div>
+          <div class="tag">SIGNALS</div>
+        </div>
+        <div>
+          <div class="num-display text-3xl mb-1" id="stat-sources">—</div>
+          <div class="tag">SOURCES</div>
+        </div>
+        <div>
+          <div class="num-display text-3xl mb-1">3</div>
+          <div class="tag">CATEGORIES</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Report form -->
+  <section class="mt-20 pt-10 border-t border-soft">
+    <div class="grid grid-cols-12 gap-10">
+      <div class="col-span-4">
+        <div class="tag mb-3">SUBMIT A SIGNAL</div>
+        <p class="text-sm ink-3 leading-relaxed">
+          Have firsthand experience? Reports are factored into the next score update. Only public signals are used in scoring.
+        </p>
+      </div>
+      <div class="col-span-8">
+        <form id="report-form" class="space-y-4">
+          <div>
+            <div class="tag mb-2">TYPE</div>
+            <div class="report-radio">
+              <div>
+                <input type="radio" name="type" value="positive" id="r-positive">
+                <label for="r-positive">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+                  Positive
+                </label>
+              </div>
+              <div>
+                <input type="radio" name="type" value="negative" id="r-negative">
+                <label for="r-negative">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                  Negative
+                </label>
+              </div>
+            </div>
+          </div>
+          <div>
+            <div class="tag mb-2">DETAILS (OPTIONAL)</div>
+            <textarea class="report-textarea" name="comment" placeholder="Describe what you experienced or witnessed…"></textarea>
+          </div>
+          <button type="submit" class="btn-primary">Submit Report</button>
+        </form>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- ── Footer ──────────────────────────────────────────────────────────────── -->
+<footer class="border-t border-line mt-20">
+  <div class="max-w-[1400px] mx-auto px-10 py-6 flex items-center justify-between mono text-xs ink-3">
+    <div>WHISTLEBLOWER</div>
+    <div class="flex gap-6">
+      <a href="#" class="hover:text-[var(--ink)]">For businesses</a>
+      <a href="#" class="hover:text-[var(--ink)]">Methodology</a>
+      <a href="#" class="hover:text-[var(--ink)]">Contact</a>
+    </div>
+  </div>
+</footer>
+
+<script type="module">
+  import { fetchSearch } from "./js/api.js";
+  import { renderResult, renderLoading } from "./js/render.js";
+  import { initReportForm } from "./js/report.js";
+
+  // Navigate back to search on header click
+  document.getElementById("header-search-trigger")?.addEventListener("click", () => {
+    window.location.href = "search.html";
+  });
+
+  // Write grade back to recent searches so chips show proper color
+  function updateRecentGrade(name, score) {
+    const COLORS = { A: 'var(--green)', B: 'var(--green)', C: 'var(--amber)', D: 'var(--red)', F: 'var(--red)' };
+    const grade = score >= 90 ? 'A' : score >= 80 ? 'B' : score >= 70 ? 'C' : score >= 60 ? 'D' : 'F';
+    const color = COLORS[grade];
+    try {
+      const key = 'wb_recent_searches';
+      const recent = JSON.parse(localStorage.getItem(key) || '[]');
+      const entry = recent.find(r => r.name === name);
+      if (entry) { entry.grade = grade; entry.color = color; }
+      else recent.unshift({ name, grade, color, href: window.location.href });
+      localStorage.setItem(key, JSON.stringify(recent.slice(0, 8)));
+    } catch {}
+  }
+
+  // Read query params or sessionStorage
+  const params   = new URLSearchParams(window.location.search);
+  const query    = params.get("query") || "";
+  const location = params.get("location") || "";
+
+  // Try to enrich from sessionStorage
+  let bizData = null;
+  try { bizData = JSON.parse(sessionStorage.getItem("wb_business")); } catch {}
+
+  if (!query) {
+    // No params — redirect back to search automatically
+    window.location.replace("search.html");
+  } else {
+    renderLoading();
+    fetchSearch(query, location)
+      .then(data => {
+        // Merge sessionStorage type if backend didn't return it
+        if (bizData?.type && !data.type) data.type = bizData.type;
+        renderResult(data);
+        initReportForm(data.place_id || data.id);
+        updateRecentGrade(data.name || query, data.final?.score ?? 0);
+      })
+      .catch(err => {
+        console.error(err);
+        showError(err.message || "Failed to load business data.");
+      });
+  }
+
+  function showError(msg) {
+    document.getElementById("main-content").classList.add("hidden");
+    document.getElementById("error-state").classList.remove("hidden");
+    document.getElementById("error-message").textContent = msg;
+  }
+</script>
+
+</body>
+</html>

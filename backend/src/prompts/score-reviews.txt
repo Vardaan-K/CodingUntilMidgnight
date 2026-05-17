@@ -30,11 +30,17 @@ SCORING GUIDANCE:
 - 20-39 = serious well-documented problems
 - 0-19 = severe, systemic harm
 
-The baseline is 80. A business with no evidence either way scores 80. Every negative finding pulls the score down. Positive findings can push above 80. A $1.5M labor settlement should bring operations below 50. Unverified allegations still pull down by 5-10 points each.
+The baseline is 80. Every negative finding pulls the score down. Positive findings can push above 80. A $1.5M labor settlement should bring operations below 50. Unverified allegations still pull down by 5-10 points each.
 
 Final score = average of all three category scores.
 
-IMPORTANT: For sources, use the EXACT full URLs from the research data. Do NOT shorten to domain names.
+SUBTAG VALUES — pick the single best fit per signal:
+Identity subtags: lgbtq, race, gender, religion, disability, age
+Operations subtags: wages, harassment, management, scheduling, hiring
+Safety subtags: health, food_safety, environment, materials, osha
+Positive subtags (any category): recognition, improvement
+
+IMPORTANT: For source_url, use the EXACT full URLs from the research data. Do NOT shorten to domain names.
 
 Return your assessment as XML:
 
@@ -45,21 +51,39 @@ Return your assessment as XML:
     <score>0-100</score>
     <summary>2-3 sentence findings</summary>
     <signals>
-      <signal>specific finding with exact source URL</signal>
+      <signal>
+        <text>specific finding with context</text>
+        <sentiment>negative</sentiment>
+        <subtag>lgbtq</subtag>
+        <source_name>Glassdoor</source_name>
+        <source_url>https://exact-url-from-research.com/page</source_url>
+      </signal>
     </signals>
   </identity>
   <operations>
     <score>0-100</score>
     <summary>2-3 sentence findings</summary>
     <signals>
-      <signal>specific finding with exact source URL</signal>
+      <signal>
+        <text>specific finding with context</text>
+        <sentiment>negative</sentiment>
+        <subtag>wages</subtag>
+        <source_name>Reddit</source_name>
+        <source_url>https://exact-url-from-research.com/page</source_url>
+      </signal>
     </signals>
   </operations>
   <safety>
     <score>0-100</score>
     <summary>2-3 sentence findings</summary>
     <signals>
-      <signal>specific finding with exact source URL</signal>
+      <signal>
+        <text>specific finding with context</text>
+        <sentiment>negative</sentiment>
+        <subtag>food_safety</subtag>
+        <source_name>Yelp</source_name>
+        <source_url>https://exact-url-from-research.com/page</source_url>
+      </signal>
     </signals>
   </safety>
   <final>

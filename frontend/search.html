@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Whistleblower — Search</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: #FAFAF7;
+    --ink: #0A0A0A;
+    --ink-2: #2A2A2A;
+    --ink-3: #5A5A5A;
+    --ink-4: #8B8B85;
+    --line-soft: #D8D5CC;
+    --line-faint: #EFEDE5;
+    --red: #C8242C;
+    --red-paper: #FBE8E5;
+    --amber: #B07308;
+    --amber-paper: #FAF1DA;
+    --green: #2D7A3E;
+    --green-paper: #E4F0E5;
+    --blue: #1E5FAD;
+    --blue-paper: #E2ECF8;
+  }
+  * { box-sizing: border-box; }
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Inter', sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  .serif { font-family: 'Instrument Serif', serif; font-weight: 400; letter-spacing: -0.01em; }
+  .mono { font-family: 'JetBrains Mono', monospace; font-feature-settings: 'tnum'; }
+  .tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--ink-3);
+  }
+  .num-display {
+    font-family: 'Instrument Serif', serif;
+    font-feature-settings: 'tnum';
+    letter-spacing: -0.05em;
+    line-height: 0.85;
+  }
+  .ink-3 { color: var(--ink-3); }
+  .ink-4 { color: var(--ink-4); }
+  .border-line { border-color: var(--ink); }
+  .border-soft { border-color: var(--line-soft); }
+  .border-faint { border-color: var(--line-faint); }
+
+  .grade-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px 4px 4px;
+    border-radius: 3px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+  .grade-letter-sm {
+    font-family: 'Instrument Serif', serif;
+    font-size: 16px;
+    line-height: 1;
+    width: 22px; height: 22px;
+    border-radius: 2px;
+    display: flex; align-items: center; justify-content: center;
+    letter-spacing: 0;
+  }
+
+  .search-input {
+    background: white;
+    border: 1.5px solid var(--ink);
+    border-radius: 4px;
+    padding: 14px 18px;
+    font-family: 'Inter', sans-serif;
+    font-size: 16px;
+    color: var(--ink);
+    width: 100%;
+    outline: none;
+    transition: box-shadow 0.15s ease;
+  }
+  .search-input:focus {
+    box-shadow: 0 0 0 3px rgba(10,10,10,0.08);
+  }
+  .search-input::placeholder {
+    color: var(--ink-4);
+  }
+
+  .search-btn {
+    background: var(--ink);
+    color: var(--paper);
+    border: none;
+    border-radius: 4px;
+    padding: 14px 22px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    cursor: pointer;
+    transition: opacity 0.15s;
+    white-space: nowrap;
+  }
+  .search-btn:hover { opacity: 0.82; }
+
+  .recent-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    padding: 5px 10px;
+    border-radius: 3px;
+    background: white;
+    border: 1px solid var(--line-soft);
+    color: var(--ink-2);
+    cursor: pointer;
+    transition: border-color 0.12s, background 0.12s;
+  }
+  .recent-chip:hover { border-color: var(--ink); background: var(--line-faint); }
+  .recent-chip .chip-grade {
+    font-family: 'Instrument Serif', serif;
+    font-size: 13px;
+    line-height: 1;
+    letter-spacing: 0;
+  }
+
+  .business-card {
+    border: 1px solid var(--line-soft);
+    border-radius: 4px;
+    padding: 20px;
+    background: white;
+    cursor: pointer;
+    transition: border-color 0.12s, box-shadow 0.12s;
+    text-decoration: none;
+    display: block;
+    color: inherit;
+  }
+  .business-card:hover {
+    border-color: var(--ink);
+    box-shadow: 0 2px 12px rgba(10,10,10,0.07);
+  }
+
+  .score-bar {
+    height: 3px;
+    background: var(--line-faint);
+    border-radius: 2px;
+    overflow: hidden;
+    margin-top: 10px;
+  }
+  .score-bar > div { height: 100%; border-radius: 2px; }
+
+  .tag-pill-sm {
+    display: inline-flex;
+    align-items: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 2px 6px;
+    border-radius: 2px;
+    background: var(--line-faint);
+    color: var(--ink-3);
+  }
+  .tag-pill-sm.red { background: var(--red-paper); color: var(--red); }
+  .tag-pill-sm.amber { background: var(--amber-paper); color: var(--amber); }
+  .tag-pill-sm.green { background: var(--green-paper); color: var(--green); }
+
+  .divider-label {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+  .divider-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--line-faint);
+  }
+
+  #suggestions-dropdown {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0; right: 0;
+    background: white;
+    border: 1.5px solid var(--ink);
+    border-radius: 4px;
+    z-index: 50;
+    overflow: hidden;
+  }
+  .suggestion-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    font-size: 14px;
+    cursor: pointer;
+    border-bottom: 1px solid var(--line-faint);
+    transition: background 0.1s;
+  }
+  .suggestion-item:last-child { border-bottom: none; }
+  .suggestion-item:hover { background: var(--line-faint); }
+  .suggestion-item .suggestion-sub {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--ink-4);
+    margin-left: auto;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .location-select {
+    background: white;
+    border: 1.5px solid var(--ink);
+    border-radius: 4px;
+    padding: 14px 36px 14px 44px;
+    font-family: 'Inter', sans-serif;
+    font-size: 16px;
+    color: var(--ink);
+    outline: none;
+    appearance: none;
+    -webkit-appearance: none;
+    cursor: pointer;
+    transition: box-shadow 0.15s ease;
+    white-space: nowrap;
+  }
+  .location-select:focus {
+    box-shadow: 0 0 0 3px rgba(10,10,10,0.08);
+  }
+  .location-select-wrap {
+    position: relative;
+    flex-shrink: 0;
+  }
+  .location-select-wrap .loc-icon {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+    color: var(--ink-4);
+  }
+  .location-select-wrap .loc-chevron {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+    color: var(--ink-4);
+  }
+  .search-divider {
+    width: 1px;
+    background: var(--line-soft);
+    align-self: stretch;
+    margin: 4px 0;
+  }
+  .search-box {
+    display: flex;
+    align-items: stretch;
+    background: white;
+    border: 1.5px solid var(--ink);
+    border-radius: 4px;
+    overflow: hidden;
+    transition: box-shadow 0.15s ease;
+  }
+  .search-box:focus-within {
+    box-shadow: 0 0 0 3px rgba(10,10,10,0.08);
+  }
+  .search-box .search-input {
+    border: none;
+    border-radius: 0;
+    flex: 1;
+    min-width: 0;
+  }
+  .search-box .search-input:focus { box-shadow: none; }
+  .search-box .location-select {
+    border: none;
+    border-radius: 0;
+    border-left: 1.5px solid var(--line-soft);
+  }
+  .search-box .location-select:focus { box-shadow: none; }
+</style>
+</head>
+<body>
+
+<header class="border-b border-line">
+  <div class="max-w-[1400px] mx-auto px-10 py-5 flex items-center justify-between">
+    <a href="search.html" class="flex items-center gap-3 no-underline" style="color: inherit;">
+      <div class="w-6 h-6 bg-[var(--ink)] flex items-center justify-center">
+        <div class="w-1.5 h-1.5 bg-[var(--paper)]"></div>
+      </div>
+      <span class="serif text-xl">Whistleblower</span>
+    </a>
+  </div>
+</header>
+
+<main class="max-w-[1400px] mx-auto px-10">
+
+  <!-- HERO -->
+  <section class="pt-20 pb-16 max-w-2xl mx-auto text-center">
+    <div class="tag mb-5">BUSINESS ACCOUNTABILITY PLATFORM</div>
+    <h1 class="serif text-[72px] leading-none mb-4">Who can you<br><span class="italic">trust?</span></h1>
+    <p class="serif text-xl leading-relaxed mb-10" style="color: var(--ink-3);">
+      Search any business. We surface public signals — reviews, citations, complaints — and give you a score.
+    </p>
+
+    <!-- SEARCH -->
+    <div class="relative">
+      <div class="flex gap-2 items-stretch">
+        <div class="search-box flex-1">
+          <!-- Name field -->
+          <div class="relative flex-1" style="display:flex; align-items:stretch;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="absolute left-4 top-1/2 -translate-y-1/2 ink-4" style="pointer-events:none;"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+            <input
+              id="search-input"
+              class="search-input"
+              style="padding-left: 44px; border-radius:0; flex:1;"
+              placeholder="Business name…"
+              autocomplete="off"
+              type="search"
+            />
+          </div>
+          <!-- Location field -->
+          <div class="location-select-wrap">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="loc-icon"><path d="M20 10c0 6-8 13-8 13S4 16 4 10a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+            <select id="location-select" class="location-select">
+              <option value="san-luis-obispo">San Luis Obispo, CA</option>
+            </select>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" class="loc-chevron"><path d="m6 9 6 6 6-6"/></svg>
+          </div>
+        </div>
+        <button class="search-btn" id="search-btn">Search</button>
+      </div>
+      <div id="suggestions-dropdown" style="display:none;"></div>
+    </div>
+
+    <!-- RECENT SEARCHES -->
+    <div id="recent-section" class="mt-5" style="display:none;">
+      <div class="flex items-center justify-between mb-3">
+        <span class="tag">RECENT SEARCHES</span>
+        <button id="clear-recent" class="mono text-[10px] ink-4 hover:text-[var(--ink)] underline uppercase tracking-widest">Clear</button>
+      </div>
+      <div id="recent-chips" class="flex flex-wrap gap-2 justify-start"></div>
+    </div>
+  </section>
+
+  <div class="border-t border-faint"></div>
+
+  <!-- TRENDING / FEATURED -->
+  <section class="py-14">
+    <div class="divider-label">
+      <span class="tag">RECENTLY SCORED</span>
+    </div>
+
+    <div class="grid grid-cols-3 gap-4" id="featured-grid">
+
+      <a href="business.html?query=SLO+DOCO&location=San+Luis+Obispo%2CCalifornia%2CUnited+States" class="business-card">
+        <div class="flex items-start justify-between mb-3">
+          <div>
+            <div class="tag mb-1">DONUT SHOP · SAN LUIS OBISPO, CA</div>
+            <div class="serif text-2xl leading-tight">SLO DOCO</div>
+          </div>
+          <div class="grade-badge" style="background: var(--red);">
+            <span class="grade-letter-sm" style="background:white; color: var(--red);">F</span>
+            <span class="mono text-[9px] text-white tracking-widest">GRADE</span>
+          </div>
+        </div>
+        <div class="flex items-baseline gap-2 mb-1">
+          <span class="num-display text-4xl" style="color:var(--red);">42</span>
+          <span class="mono text-xs ink-4">/100</span>
+        </div>
+        <div class="score-bar"><div style="width:42%; background:var(--red);"></div></div>
+        <div class="flex gap-1.5 mt-3 flex-wrap">
+          <span class="tag-pill-sm red">Wage theft</span>
+          <span class="tag-pill-sm red">LGBTQ+</span>
+          <span class="tag-pill-sm amber">Health code</span>
+        </div>
+        <div class="mono text-[10px] ink-4 mt-3">347 signals · 8 sources · updated 3d ago</div>
+      </a>
+
+      <a href="#" class="business-card">
+        <div class="flex items-start justify-between mb-3">
+          <div>
+            <div class="tag mb-1">COFFEE CHAIN · NATIONWIDE</div>
+            <div class="serif text-2xl leading-tight">Sunrise Roasters</div>
+          </div>
+          <div class="grade-badge" style="background: var(--amber);">
+            <span class="grade-letter-sm" style="background:white; color: var(--amber);">C</span>
+            <span class="mono text-[9px] text-white tracking-widest">GRADE</span>
+          </div>
+        </div>
+        <div class="flex items-baseline gap-2 mb-1">
+          <span class="num-display text-4xl" style="color:var(--amber);">61</span>
+          <span class="mono text-xs ink-4">/100</span>
+        </div>
+        <div class="score-bar"><div style="width:61%; background:var(--amber);"></div></div>
+        <div class="flex gap-1.5 mt-3 flex-wrap">
+          <span class="tag-pill-sm amber">Scheduling</span>
+          <span class="tag-pill-sm">Accessibility</span>
+        </div>
+        <div class="mono text-[10px] ink-4 mt-3">198 signals · 5 sources · updated 1w ago</div>
+      </a>
+
+      <a href="#" class="business-card">
+        <div class="flex items-start justify-between mb-3">
+          <div>
+            <div class="tag mb-1">RETAIL · PORTLAND, OR</div>
+            <div class="serif text-2xl leading-tight">Harbor & Oak</div>
+          </div>
+          <div class="grade-badge" style="background: var(--green);">
+            <span class="grade-letter-sm" style="background:white; color: var(--green);">A</span>
+            <span class="mono text-[9px] text-white tracking-widest">GRADE</span>
+          </div>
+        </div>
+        <div class="flex items-baseline gap-2 mb-1">
+          <span class="num-display text-4xl" style="color:var(--green);">88</span>
+          <span class="mono text-xs ink-4">/100</span>
+        </div>
+        <div class="score-bar"><div style="width:88%; background:var(--green);"></div></div>
+        <div class="flex gap-1.5 mt-3 flex-wrap">
+          <span class="tag-pill-sm green">Living wage</span>
+          <span class="tag-pill-sm green">Inclusive</span>
+        </div>
+        <div class="mono text-[10px] ink-4 mt-3">412 signals · 9 sources · updated 2d ago</div>
+      </a>
+
+      <a href="#" class="business-card">
+        <div class="flex items-start justify-between mb-3">
+          <div>
+            <div class="tag mb-1">RESTAURANT · AUSTIN, TX</div>
+            <div class="serif text-2xl leading-tight">Mesa Verde Kitchen</div>
+          </div>
+          <div class="grade-badge" style="background: var(--red);">
+            <span class="grade-letter-sm" style="background:white; color: var(--red);">D</span>
+            <span class="mono text-[9px] text-white tracking-widest">GRADE</span>
+          </div>
+        </div>
+        <div class="flex items-baseline gap-2 mb-1">
+          <span class="num-display text-4xl" style="color:var(--red);">38</span>
+          <span class="mono text-xs ink-4">/100</span>
+        </div>
+        <div class="score-bar"><div style="width:38%; background:var(--red);"></div></div>
+        <div class="flex gap-1.5 mt-3 flex-wrap">
+          <span class="tag-pill-sm red">Food safety</span>
+          <span class="tag-pill-sm red">Harassment</span>
+        </div>
+        <div class="mono text-[10px] ink-4 mt-3">89 signals · 4 sources · updated 5d ago</div>
+      </a>
+
+      <a href="#" class="business-card">
+        <div class="flex items-start justify-between mb-3">
+          <div>
+            <div class="tag mb-1">TECH STARTUP · SAN FRANCISCO, CA</div>
+            <div class="serif text-2xl leading-tight">Vertex Labs</div>
+          </div>
+          <div class="grade-badge" style="background: var(--amber);">
+            <span class="grade-letter-sm" style="background:white; color: var(--amber);">B</span>
+            <span class="mono text-[9px] text-white tracking-widest">GRADE</span>
+          </div>
+        </div>
+        <div class="flex items-baseline gap-2 mb-1">
+          <span class="num-display text-4xl" style="color:var(--amber);">74</span>
+          <span class="mono text-xs ink-4">/100</span>
+        </div>
+        <div class="score-bar"><div style="width:74%; background:var(--amber);"></div></div>
+        <div class="flex gap-1.5 mt-3 flex-wrap">
+          <span class="tag-pill-sm amber">Burnout</span>
+          <span class="tag-pill-sm green">Pay equity</span>
+        </div>
+        <div class="mono text-[10px] ink-4 mt-3">231 signals · 6 sources · updated 4d ago</div>
+      </a>
+
+      <a href="#" class="business-card">
+        <div class="flex items-start justify-between mb-3">
+          <div>
+            <div class="tag mb-1">GROCERY · CHICAGO, IL</div>
+            <div class="serif text-2xl leading-tight">Elm Street Market</div>
+          </div>
+          <div class="grade-badge" style="background: var(--green);">
+            <span class="grade-letter-sm" style="background:white; color: var(--green);">B</span>
+            <span class="mono text-[9px] text-white tracking-widest">GRADE</span>
+          </div>
+        </div>
+        <div class="flex items-baseline gap-2 mb-1">
+          <span class="num-display text-4xl" style="color:var(--green);">79</span>
+          <span class="mono text-xs ink-4">/100</span>
+        </div>
+        <div class="score-bar"><div style="width:79%; background:var(--green);"></div></div>
+        <div class="flex gap-1.5 mt-3 flex-wrap">
+          <span class="tag-pill-sm green">Union-friendly</span>
+          <span class="tag-pill-sm">Accessibility</span>
+        </div>
+        <div class="mono text-[10px] ink-4 mt-3">156 signals · 7 sources · updated 1w ago</div>
+      </a>
+
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section class="border-t border-faint pt-14 pb-16">
+    <div class="divider-label">
+      <span class="tag">HOW IT WORKS</span>
+    </div>
+    <div class="grid grid-cols-4 gap-8">
+      <div>
+        <div class="num-display text-4xl mb-3" style="color:var(--ink-4);">01</div>
+        <div class="serif text-xl mb-2">Search</div>
+        <p class="text-sm ink-3 leading-relaxed">Enter any business name. We look it up across public records, review platforms, and news archives.</p>
+      </div>
+      <div>
+        <div class="num-display text-4xl mb-3" style="color:var(--ink-4);">02</div>
+        <div class="serif text-xl mb-2">Gather</div>
+        <p class="text-sm ink-3 leading-relaxed">Our AI reads thousands of signals — Glassdoor, Yelp, Reddit, court filings, health inspections, and more.</p>
+      </div>
+      <div>
+        <div class="num-display text-4xl mb-3" style="color:var(--ink-4);">03</div>
+        <div class="serif text-xl mb-2">Score</div>
+        <p class="text-sm ink-3 leading-relaxed">Every signal is weighted by credibility, recency, and severity. The result is a 0–100 Whistleblower Score.</p>
+      </div>
+      <div>
+        <div class="num-display text-4xl mb-3" style="color:var(--ink-4);">04</div>
+        <div class="serif text-xl mb-2">Trace</div>
+        <p class="text-sm ink-3 leading-relaxed">Every score links back to its source. No black boxes — every point can be traced to a public receipt.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ABOUT -->
+  <section class="border-t border-faint pt-14 pb-20">
+    <div class="divider-label">
+      <span class="tag">ABOUT</span>
+    </div>
+    <div class="grid grid-cols-12 gap-10">
+      <div class="col-span-5">
+        <h2 class="serif text-[42px] leading-tight mb-4">Accountability through<br><span class="italic">public signals.</span></h2>
+        <p class="text-sm ink-3 leading-relaxed mb-4">
+          Whistleblower is an AI-powered platform that aggregates public records, employee reviews, health inspections, news reports, and social signals to produce a single, traceable accountability score for any business.
+        </p>
+        <p class="text-sm ink-3 leading-relaxed">
+          We don't take sides. Every point in a score is backed by a public source anyone can read. No anonymous accusations, no black boxes — just the signal, weighted by recency and credibility.
+        </p>
+      </div>
+      <div class="col-span-3 col-start-7">
+        <div class="tag mb-4">WHAT WE TRACK</div>
+        <ul class="space-y-3">
+          <li class="flex items-start gap-2 text-sm ink-3">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mt-0.5 flex-shrink-0" style="color:var(--ink-4);"><polyline points="9 18 15 12 9 6"/></svg>
+            Employee reviews & labor complaints
+          </li>
+          <li class="flex items-start gap-2 text-sm ink-3">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mt-0.5 flex-shrink-0" style="color:var(--ink-4);"><polyline points="9 18 15 12 9 6"/></svg>
+            Health & safety inspection records
+          </li>
+          <li class="flex items-start gap-2 text-sm ink-3">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mt-0.5 flex-shrink-0" style="color:var(--ink-4);"><polyline points="9 18 15 12 9 6"/></svg>
+            Customer discrimination reports
+          </li>
+          <li class="flex items-start gap-2 text-sm ink-3">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mt-0.5 flex-shrink-0" style="color:var(--ink-4);"><polyline points="9 18 15 12 9 6"/></svg>
+            Local news & court filings
+          </li>
+          <li class="flex items-start gap-2 text-sm ink-3">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mt-0.5 flex-shrink-0" style="color:var(--ink-4);"><polyline points="9 18 15 12 9 6"/></svg>
+            Reddit, Yelp, Google, Glassdoor, Indeed
+          </li>
+        </ul>
+      </div>
+      <div class="col-span-3 col-start-10">
+        <div class="tag mb-4">SCORE GRADES</div>
+        <div class="space-y-2">
+          <div class="flex items-center gap-3">
+            <span class="grade-badge" style="background:var(--green);"><span class="grade-letter-sm" style="background:white;color:var(--green);">A</span></span>
+            <span class="text-sm ink-3">80 – 100 · Exemplary</span>
+          </div>
+          <div class="flex items-center gap-3">
+            <span class="grade-badge" style="background:var(--green);"><span class="grade-letter-sm" style="background:white;color:var(--green);">B</span></span>
+            <span class="text-sm ink-3">65 – 79 · Passing</span>
+          </div>
+          <div class="flex items-center gap-3">
+            <span class="grade-badge" style="background:var(--amber);"><span class="grade-letter-sm" style="background:white;color:var(--amber);">C</span></span>
+            <span class="text-sm ink-3">50 – 64 · Concerning</span>
+          </div>
+          <div class="flex items-center gap-3">
+            <span class="grade-badge" style="background:var(--red);"><span class="grade-letter-sm" style="background:white;color:var(--red);">D</span></span>
+            <span class="text-sm ink-3">35 – 49 · Poor</span>
+          </div>
+          <div class="flex items-center gap-3">
+            <span class="grade-badge" style="background:var(--red);"><span class="grade-letter-sm" style="background:white;color:var(--red);">F</span></span>
+            <span class="text-sm ink-3">0 – 34 · Failing</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="border-t border-line">
+  <div class="max-w-[1400px] mx-auto px-10 py-6 flex items-center justify-between mono text-xs ink-3">
+    <div>WHISTLEBLOWER</div>
+    <div class="flex gap-6">
+      <a href="#" class="hover:text-[var(--ink)]">For businesses</a>
+      <a href="#" class="hover:text-[var(--ink)]">Methodology</a>
+      <a href="#" class="hover:text-[var(--ink)]">Contact</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+  const BASE = 'http://localhost:3001';
+  const STORAGE_KEY = 'wb_recent_searches';
+  const MAX_RECENT = 8;
+
+  // Hardcoded to SLO — matches SerpAPI canonical location name
+  const SLO = {
+    name: 'San Luis Obispo',
+    canonical_name: 'San Luis Obispo,California,United States',
+    gps: { lat: 35.2827524, lng: -120.6596156 },
+  };
+
+  function bizHref(name) {
+    return `business.html?query=${encodeURIComponent(name)}&location=${encodeURIComponent(SLO.canonical_name)}`;
+  }
+
+  // ── Recent searches ────────────────────────────────────────────────────────
+
+  function getRecent() {
+    try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); }
+    catch { return []; }
+  }
+
+  function saveSearch(name) {
+    let recent = getRecent().filter(r => r.name !== name);
+    recent.unshift({ name, grade: null, color: null, href: bizHref(name) });
+    if (recent.length > MAX_RECENT) recent = recent.slice(0, MAX_RECENT);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(recent));
+  }
+
+  function renderRecent() {
+    const recent = getRecent();
+    const section = document.getElementById('recent-section');
+    const chips = document.getElementById('recent-chips');
+    if (!recent.length) { section.style.display = 'none'; return; }
+    section.style.display = 'block';
+    chips.innerHTML = recent.map(r => `
+      <button class="recent-chip" data-href="${r.href}">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--ink-4);flex-shrink:0;"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="9"/></svg>
+        <span>${r.name}</span>
+        ${r.grade ? `<span class="chip-grade" style="color:${r.color};">${r.grade}</span>` : ''}
+      </button>
+    `).join('');
+    chips.querySelectorAll('.recent-chip').forEach(chip => {
+      chip.addEventListener('click', () => { window.location.href = chip.dataset.href; });
+    });
+  }
+
+  // ── Autocomplete (real API) ────────────────────────────────────────────────
+
+  let debounceTimer = null;
+
+  async function showSuggestions(query) {
+    const dd = document.getElementById('suggestions-dropdown');
+    if (query.trim().length < 3) { dd.style.display = 'none'; return; }
+
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(async () => {
+      try {
+        const { lat, lng } = SLO.gps;
+        const res = await fetch(`${BASE}/businesses?name=${encodeURIComponent(query)}&lat=${lat}&lng=${lng}`);
+        const businesses = await res.json();
+        if (!businesses.length) { dd.style.display = 'none'; return; }
+
+        dd.style.display = 'block';
+        dd.innerHTML = businesses.map(b => `
+          <div class="suggestion-item" data-name="${b.name}" data-address="${b.address || ''}">
+            <span style="font-family:'Instrument Serif',serif;font-size:17px;letter-spacing:-0.01em;">${b.name}</span>
+            <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--ink-4);">${b.address || 'San Luis Obispo, CA'}</span>
+            <span class="suggestion-sub" style="color:var(--ink-4);">SLO, CA</span>
+          </div>
+        `).join('');
+
+        dd.querySelectorAll('.suggestion-item').forEach(item => {
+          item.addEventListener('click', () => {
+            navigateTo(item.dataset.name);
+          });
+        });
+      } catch (e) {
+        console.error('Autocomplete error:', e);
+        dd.style.display = 'none';
+      }
+    }, 300);
+  }
+
+  function navigateTo(name) {
+    if (!name) return;
+    saveSearch(name);
+    renderRecent();
+    document.getElementById('suggestions-dropdown').style.display = 'none';
+    window.location.href = bizHref(name);
+  }
+
+  function doSearch() {
+    const name = document.getElementById('search-input').value.trim();
+    navigateTo(name);
+  }
+
+  // ── Event listeners ────────────────────────────────────────────────────────
+
+  document.getElementById('search-input').addEventListener('input', e => {
+    showSuggestions(e.target.value);
+  });
+
+  document.getElementById('search-input').addEventListener('keydown', e => {
+    if (e.key === 'Enter') doSearch();
+    if (e.key === 'Escape') document.getElementById('suggestions-dropdown').style.display = 'none';
+  });
+
+  document.getElementById('search-btn').addEventListener('click', doSearch);
+
+  document.getElementById('clear-recent').addEventListener('click', () => {
+    localStorage.removeItem(STORAGE_KEY);
+    renderRecent();
+  });
+
+  document.addEventListener('click', e => {
+    if (!e.target.closest('#search-input') && !e.target.closest('#suggestions-dropdown')) {
+      document.getElementById('suggestions-dropdown').style.display = 'none';
+    }
+  });
+
+  renderRecent();
+</script>
+
+</body>
+</html>
