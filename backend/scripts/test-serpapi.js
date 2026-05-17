@@ -1,4 +1,4 @@
-import { searchBusiness, getReviews } from "./staticScraperMain.js";
+import { searchBusiness, getReviews } from "../src/scrapers/serpapi/client.js";
 
 // Hardcode location — no API call needed
 // gps coords from searchLocations("San Luis Obispo")[0]
