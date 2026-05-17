@@ -20,8 +20,8 @@ CREATE TABLE IF NOT EXISTS classified_cache (
 );
 
 -- (normalized_query, normalized_location) -> place_id
--- Lets us skip the paid Google Places lookup on every cache hit.
--- place_id = '' means "we tried, no match" — cached so we don't re-call.
+-- Skip the paid Google Places lookup on every cache hit.
+-- place_id = '' means "we tried, no match" — cached so no re-call.
 CREATE TABLE IF NOT EXISTS resolution_cache (
   query_norm TEXT NOT NULL,
   location_norm TEXT NOT NULL,
